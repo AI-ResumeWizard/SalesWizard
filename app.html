@@ -1,0 +1,3144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-SalesWizard — Playbook Builder</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:    #4EA72E;
+  --green-d:  #3d8a24;
+  --green-bg: #f0f9ec;
+  --green-b:  rgba(78,167,46,0.2);
+  --blue:     #156082;
+  --blue-d:   #0f4a63;
+  --blue-bg:  #eef4f8;
+  --blue-b:   rgba(21,96,130,0.2);
+  --brown:    #795F16;
+  --brown-bg: #fdf7ec;
+  --brown-b:  rgba(121,95,22,0.2);
+  --red:      #c0392b;
+  --red-bg:   #fdf0ee;
+  --red-b:    rgba(192,57,43,0.2);
+  --bg:       #f4f5f7;
+  --white:    #ffffff;
+  --border:   #e0e3e8;
+  --border2:  #c8cdd6;
+  --text:     #1a1d23;
+  --text2:    #4a5568;
+  --text3:    #8a95a3;
+  --sidebar:  220px;
+  --chat:     320px;
+  --r:        6px;
+  --r2:       8px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;overflow:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+.shell{display:flex;height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);min-width:var(--sidebar);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sb-top{padding:14px 16px 12px;border-bottom:1px solid var(--border)}
+.wordmark{font-size:15px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:8px;letter-spacing:-0.01em}
+.wm-icon{width:26px;height:26px;background:var(--green);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:white}
+.wm-sub{color:var(--green)}
+.sb-sect{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);padding:14px 16px 5px}
+.sb-scroll{flex:1;overflow-y:auto;padding-bottom:10px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;border-left:3px solid transparent;border-right:3px solid transparent}
+.nav-item:hover{color:var(--text);background:#f8f9fa}
+.nav-item.active{color:var(--green);background:var(--green-bg);border-left-color:var(--green);font-weight:600}
+.nav-ico{width:14px;text-align:center;font-size:13px;flex-shrink:0}
+.nav-bdg{margin-left:auto;font-size:10px;font-weight:700;background:var(--border);color:var(--text2);padding:1px 6px;border-radius:10px}
+.nav-item.active .nav-bdg{background:var(--green);color:white}
+.pnav{margin:2px 10px;padding:6px 10px;border-radius:var(--r);cursor:pointer;transition:all .12s;border:1px solid transparent}
+.pnav:hover{background:#f8f9fa;border-color:var(--border)}
+.pnav.active{background:var(--green-bg);border-color:var(--green-b)}
+.pnav-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
+.pnav-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.pnav.active .pnav-name{color:var(--green)}
+.btn-addprod{display:flex;align-items:center;gap:6px;margin:4px 10px 0;padding:6px 10px;border:1px dashed var(--border2);border-radius:var(--r);cursor:pointer;font-family:Arial,sans-serif;font-size:12px;color:var(--text3);background:none;width:calc(100% - 20px);transition:all .12s}
+.btn-addprod:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+.sb-foot{padding:10px 14px;border-top:1px solid var(--border)}
+.comp-row{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.comp-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.comp-fill{height:100%;background:var(--green);border-radius:2px;transition:width .5s ease}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.mhdr{padding:14px 22px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--white)}
+.mhdr-left{}
+.pg-eye{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:2px}
+.pg-title{font-size:18px;font-weight:700;color:var(--text);line-height:1.2}
+.pg-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.hdr-acts{display:flex;gap:7px;align-items:center}
+.mbody{flex:1;min-height:0;overflow-y:auto;padding:20px 22px 48px;background:var(--bg)}
+.api-key-wrap{position:relative}
+.api-key-wrap input{font-family:monospace;font-size:12px;letter-spacing:.04em;padding-right:72px}
+.api-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--blue);cursor:pointer;background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:4px;padding:2px 7px;transition:all .12s}
+.api-toggle:hover{background:var(--blue);color:white}
+.api-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;margin-top:5px}
+.api-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* ── PANELS ── */
+.panel{display:none;flex-direction:column;flex:1;min-height:0;animation:pin .2s ease}
+.panel.active{display:flex}
+@keyframes pin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r);font-family:Arial,sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;border:1px solid transparent;white-space:nowrap}
+.btn-primary{background:var(--green);color:white;border-color:var(--green)}
+.btn-primary:hover{background:var(--green-d);border-color:var(--green-d)}
+.btn-ghost{background:white;color:var(--text2);border-color:var(--border)}
+.btn-ghost:hover{background:#f8f9fa;color:var(--text);border-color:var(--border2)}
+.btn-blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-b)}
+.btn-blue:hover{background:var(--blue);color:white}
+.btn-brown{background:var(--brown-bg);color:var(--brown);border-color:var(--brown-b)}
+.btn-brown:hover{background:var(--brown);color:white}
+.btn-danger{background:var(--red-bg);color:var(--red);border-color:var(--red-b)}
+.btn-danger:hover{background:var(--red);color:white}
+.btn-sm{padding:5px 10px;font-size:12px}
+.ico-btn{width:26px;height:26px;border-radius:var(--r);border:1px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--text3);transition:all .12s}
+.ico-btn:hover{border-color:var(--border2);color:var(--text);background:#f8f9fa}
+.ico-btn.del:hover{border-color:var(--red-b);color:var(--red);background:var(--red-bg)}
+
+/* ── CARD (white surface) ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;margin-bottom:10px}
+.card:hover{border-color:var(--border2)}
+
+/* ── FORMS ── */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.fl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2)}
+.fh{font-size:11px;color:var(--text3);margin-top:-1px}
+input[type=text],input[type=number],textarea,select{background:white;border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;font-family:Arial,sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .12s;resize:vertical;width:100%}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(21,96,130,0.12)}
+select option{background:white}
+.dollar-wrap{position:relative}
+.dollar-wrap::before{content:'$';position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none}
+.dollar-wrap input{padding-left:20px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* ── SECTION DIVIDER ── */
+.sdiv{display:flex;align-items:center;gap:10px;margin:20px 0 12px}
+.sdiv-lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);white-space:nowrap}
+.sdiv-line{flex:1;height:1px;background:var(--border)}
+.sdiv-act{flex-shrink:0}
+
+/* ── TAG INPUT ── */
+.tag-wrap{display:flex;flex-wrap:wrap;gap:4px;background:white;border:1px solid var(--border);border-radius:var(--r);padding:6px 8px;min-height:38px;cursor:text;transition:border-color .12s;align-items:center}
+.tag-wrap:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(21,96,130,0.12)}
+.tag{display:inline-flex;align-items:center;gap:3px;background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:3px;padding:2px 7px;font-size:11px;color:var(--blue);font-weight:600}
+.tag-x{cursor:pointer;color:var(--blue);opacity:.6;font-size:12px;transition:opacity .1s;margin-left:2px}
+.tag-x:hover{opacity:1;color:var(--red)}
+.tag-inp{flex:1;min-width:100px;background:none;border:none;outline:none;font-family:Arial,sans-serif;font-size:12px;color:var(--text);padding:2px 3px}
+.tag-inp::placeholder{color:var(--text3)}
+
+/* ── METHODOLOGY RANKED ── */
+.meth-list{display:flex;flex-direction:column;gap:4px}
+.meth-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:white;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s}
+.meth-row:hover{border-color:var(--border2);background:#f8f9fa}
+.meth-row.r1{border-color:var(--brown-b);background:var(--brown-bg);border-left:3px solid var(--brown)}
+.meth-row.r2{border-color:var(--blue-b);background:var(--blue-bg);border-left:3px solid var(--blue)}
+.meth-row.r3{border-color:var(--green-b);background:var(--green-bg);border-left:3px solid var(--green)}
+.rank-bdg{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;border:1px solid var(--border);background:#f8f9fa;color:var(--text3)}
+.r1 .rank-bdg{background:var(--brown);border-color:var(--brown);color:white}
+.r2 .rank-bdg{background:var(--blue);border-color:var(--blue);color:white}
+.r3 .rank-bdg{background:var(--green);border-color:var(--green);color:white}
+.meth-info{flex:1;min-width:0}
+.meth-name{font-size:13px;font-weight:600;color:var(--text)}
+.meth-desc{font-size:11px;color:var(--text3);margin-top:1px}
+.r1 .meth-name{color:var(--brown)}.r2 .meth-name{color:var(--blue)}.r3 .meth-name{color:var(--green)}
+.meth-hint{font-size:12px;color:var(--blue);margin-top:8px;padding:9px 12px;background:var(--blue-bg);border-radius:var(--r);border:1px solid var(--blue-b)}
+
+/* ── PROCESS FLAGS ── */
+.proc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.proc-card{padding:10px 12px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;background:white;transition:all .12s;text-align:center}
+.proc-card:hover{border-color:var(--border2);background:#f8f9fa}
+.proc-card.on{border-color:var(--green-b);background:var(--green-bg);border-left:3px solid var(--green)}
+.proc-icon{font-size:16px;margin-bottom:3px}
+.proc-lbl{font-size:11px;font-weight:600;color:var(--text2)}
+.proc-card.on .proc-lbl{color:var(--green)}
+
+/* ── PAIN CARDS ── */
+.pain-card{background:white;border:1px solid var(--border);border-radius:var(--r2);padding:13px 15px;margin-bottom:8px;transition:border-color .12s}
+.pain-card:hover{border-color:var(--border2)}
+.pain-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pain-num{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px}
+.pain-num-yellow{background:var(--brown-bg);color:var(--brown);border:1px solid var(--brown-b)}
+.pain-num-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.pain-num-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.pain-num-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b)}
+.field-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+
+/* ── PERSONA CARDS ── */
+.persona-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px}
+.persona-card{background:white;border:1px solid var(--border);border-radius:var(--r2);padding:13px 15px;cursor:pointer;transition:all .12s}
+.persona-card:hover{border-color:var(--border2);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.role-bdg{display:inline-flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-bottom:6px}
+.rb-buyer{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.rb-champion{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b)}
+.rb-blocker{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.rb-influencer{background:var(--brown-bg);color:var(--brown);border:1px solid var(--brown-b)}
+.persona-ttl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.persona-snip{font-size:11px;color:var(--text3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.persona-foot{display:flex;align-items:center;justify-content:space-between;margin-top:9px;padding-top:7px;border-top:1px solid var(--border)}
+.auth-pips{display:flex;gap:3px}
+.auth-pip{width:7px;height:7px;border-radius:50%;background:var(--border);border:1px solid var(--border2);transition:all .15s}
+.auth-pip.on{background:var(--brown);border-color:var(--brown)}
+.add-persona{background:transparent;border:1px dashed var(--border2);border-radius:var(--r2);padding:22px 14px;cursor:pointer;transition:all .12s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--text3)}
+.add-persona:hover{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+
+/* ── PRODUCTS GRID ── */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.prod-card{background:white;border:1px solid var(--border);border-radius:var(--r2);padding:15px;cursor:pointer;transition:all .12s}
+.prod-card:hover{border-color:var(--green-b);box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.prod-card.add-new{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;color:var(--text3);min-height:120px}
+.prod-card.add-new:hover{color:var(--green);border-color:var(--green);background:var(--green-bg)}
+.prod-stat{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);margin-top:4px}
+.color-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── TONES ── */
+.tone-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tone-pill{padding:5px 11px;border:1px solid var(--border);border-radius:14px;cursor:pointer;font-size:12px;color:var(--text2);background:white;transition:all .12s;font-weight:500}
+.tone-pill:hover{border-color:var(--border2);color:var(--text)}
+.tone-pill.on{border-color:var(--brown-b);color:var(--brown);background:var(--brown-bg);font-weight:700}
+
+/* ── MODALS ── */
+.modal-bd{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:28px 16px;overflow-y:auto}
+.modal-bd.open{display:flex}
+.modal{background:white;border:1px solid var(--border);border-radius:var(--r2);width:100%;max-width:580px;animation:min .2s ease;flex-shrink:0;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+@keyframes min{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.modal-hdr{padding:15px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;background:#f8f9fa;border-radius:var(--r2) var(--r2) 0 0}
+.modal-title{font-size:15px;font-weight:700;color:var(--text)}
+.modal-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.modal-x{width:26px;height:26px;border-radius:var(--r);background:white;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--text3);transition:all .12s;flex-shrink:0;margin-left:10px}
+.modal-x:hover{color:var(--red);border-color:var(--red-b)}
+.modal-body{padding:18px 20px}
+.modal-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:7px;background:#f8f9fa;border-radius:0 0 var(--r2) var(--r2)}
+.role-sel{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.role-opt{padding:9px 6px;border:1px solid var(--border);border-radius:var(--r);text-align:center;cursor:pointer;transition:all .12s;background:white}
+.role-opt:hover{border-color:var(--border2);background:#f8f9fa}
+.role-opt.sel-buyer{border-color:var(--green-b);background:var(--green-bg);border-top:3px solid var(--green)}
+.role-opt.sel-champion{border-color:var(--blue-b);background:var(--blue-bg);border-top:3px solid var(--blue)}
+.role-opt.sel-blocker{border-color:var(--red-b);background:var(--red-bg);border-top:3px solid var(--red)}
+.role-opt.sel-influencer{border-color:var(--brown-b);background:var(--brown-bg);border-top:3px solid var(--brown)}
+.role-icon{font-size:16px;margin-bottom:3px}
+.role-lbl{font-size:10px;font-weight:700;color:var(--text2)}
+.sel-buyer .role-lbl{color:var(--green)}.sel-champion .role-lbl{color:var(--blue)}.sel-blocker .role-lbl{color:var(--red)}.sel-influencer .role-lbl{color:var(--brown)}
+.auth-sel{display:flex;align-items:center;gap:8px}
+.auth-btn{width:24px;height:24px;border-radius:50%;background:white;border:1px solid var(--border);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .12s}
+.auth-btn:hover{border-color:var(--brown);color:var(--brown)}
+.auth-lbl{font-size:11px;color:var(--text3);font-weight:600}
+
+/* ── CHAT PANEL ── */
+.chat-panel{width:var(--chat);min-width:var(--chat);background:white;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.chat-hdr{padding:12px 14px 10px;border-bottom:1px solid var(--border);background:#f8f9fa}
+.chat-title{font-size:12px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.05em}
+.chat-ctx-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:8px;background:#f8f9fa}
+.cmsg{max-width:90%;animation:mfade .18s ease}
+@keyframes mfade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+.cmsg.ai{align-self:flex-start}.cmsg.user{align-self:flex-end}
+.bubble{padding:8px 11px;border-radius:8px;font-size:13px;line-height:1.5}
+.ai .bubble{background:white;border:1px solid var(--border);color:var(--text);border-bottom-left-radius:2px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.user .bubble{background:var(--blue);color:white;border-bottom-right-radius:2px}
+.mtime{font-size:10px;color:var(--text3);margin-top:2px;padding:0 3px}
+.ai .mtime{text-align:left}.user .mtime{text-align:right}
+.typing-b{background:white;border:1px solid var(--border);border-radius:8px;border-bottom-left-radius:2px;padding:9px 12px;display:flex;gap:4px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tdot{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:td 1.2s infinite}
+.tdot:nth-child(2){animation-delay:.2s}.tdot:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.chat-sugg{padding:5px 10px 6px;display:flex;flex-wrap:wrap;gap:4px;flex-shrink:0;border-top:1px solid var(--border);background:white}
+.sugg{padding:4px 8px;border:1px solid var(--border);border-radius:10px;font-size:11px;color:var(--text2);cursor:pointer;transition:all .12s;white-space:nowrap;font-weight:500}
+.sugg:hover{border-color:var(--green-b);color:var(--green);background:var(--green-bg)}
+.chat-inp-row{padding:8px 10px 10px;border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:6px;align-items:flex-end;background:white}
+.chat-inp{flex:1;background:#f8f9fa;border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;font-family:Arial,sans-serif;font-size:12px;color:var(--text);outline:none;resize:none;max-height:80px;transition:border-color .12s;line-height:1.5}
+.chat-inp:focus{border-color:var(--blue);background:white}
+.chat-inp::placeholder{color:var(--text3)}
+.chat-send{width:30px;height:30px;background:var(--green);border:none;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;transition:all .12s;flex-shrink:0}
+.chat-send:hover{background:var(--green-d)}
+.chat-send:disabled{opacity:.4;cursor:not-allowed}
+
+
+/* ── INTENSITY SELECTOR ── */
+.persona-pain-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.persona-pain-section-title{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.intensity-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f9fa;border:1px solid var(--border);border-radius:var(--r);margin-bottom:5px}
+.intensity-persona-name{font-size:12px;font-weight:600;color:var(--text);min-width:120px;flex-shrink:0}
+.intensity-pills{display:flex;gap:4px;flex-shrink:0}
+.int-pill{padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);color:var(--text3);background:white;transition:all .12s;white-space:nowrap}
+.int-pill:hover{border-color:var(--border2);background:#f0f0f0}
+.int-pill.critical{background:#fdf0ee;color:var(--red);border-color:var(--red-b)}
+.int-pill.high{background:var(--brown-bg);color:var(--brown);border-color:var(--brown-b)}
+.int-pill.medium{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-b)}
+.int-pill.low{background:#f8f9fa;color:var(--text3);border-color:var(--border2)}
+.intensity-lang{flex:1;min-width:0}
+.intensity-lang input{font-size:12px;padding:5px 8px}
+.no-personas-hint{font-size:11px;color:var(--text3);font-style:italic;padding:6px 0}
+
+/* ── INDUSTRY SUGGESTION CHIP ── */
+.industry-suggest-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--r);margin-bottom:10px;font-size:12px;color:var(--green);font-weight:600}
+.industry-suggest-bar button{margin-left:auto;background:var(--green);color:white;border:none;border-radius:4px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif}
+.persona-suggest-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.persona-suggest-chip{display:flex;align-items:center;gap:6px;padding:8px 10px;background:white;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s;font-size:12px}
+.persona-suggest-chip:hover{border-color:var(--green-b);background:var(--green-bg)}
+.persona-suggest-chip.selected{border-color:var(--green);background:var(--green-bg);font-weight:600;color:var(--green)}
+.persona-suggest-chip input[type=checkbox]{accent-color:var(--green);width:14px;height:14px;flex-shrink:0}
+
+
+/* ── COMPANY TYPE CARDS ── */
+.cotype-card{background:white;border:1px solid var(--border);border-radius:var(--r2);margin-bottom:10px;overflow:hidden;transition:border-color .12s}
+.cotype-card:hover{border-color:var(--border2)}
+.cotype-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:#f8f9fa;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.cotype-hdr:hover{background:#f0f1f3}
+.cotype-hdr-left{display:flex;align-items:center;gap:8px}
+.cotype-name{font-size:13px;font-weight:700;color:var(--text)}
+.cotype-meta{font-size:11px;color:var(--text3);margin-top:1px}
+.cotype-toggle{font-size:11px;color:var(--text3);transition:transform .2s}
+.cotype-toggle.open{transform:rotate(90deg)}
+.cotype-body{padding:12px 14px;display:none}
+.cotype-body.open{display:block}
+.cotype-why{font-size:12px;color:var(--text2);margin-bottom:10px;font-style:italic;line-height:1.5}
+.cotype-persona-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f8f9fa;border:1px solid var(--border);border-radius:var(--r);margin-bottom:5px;cursor:pointer;transition:all .12s}
+.cotype-persona-row:hover{background:var(--blue-bg);border-color:var(--blue-b)}
+.cotype-persona-role{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:3px;flex-shrink:0}
+.cotype-persona-title{font-size:12px;font-weight:600;color:var(--text);flex:1}
+.cotype-persona-auth{display:flex;gap:2px;flex-shrink:0}
+.cotype-persona-pip{width:6px;height:6px;border-radius:50%;background:var(--border);border:1px solid var(--border2)}
+.cotype-persona-pip.on{background:var(--brown);border-color:var(--brown)}
+.cotype-add-persona{display:flex;align-items:center;gap:6px;padding:7px 10px;border:1px dashed var(--border2);border-radius:var(--r);cursor:pointer;font-size:12px;color:var(--text3);transition:all .12s;background:transparent;width:100%;font-family:Arial,sans-serif;margin-top:4px}
+.cotype-add-persona:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.cotype-actions{display:flex;gap:5px}
+
+/* ── SUGGEST MODAL ── */
+.suggest-chip-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.suggest-chip{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;background:white;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s}
+.suggest-chip:hover{border-color:var(--border2);background:#f8f9fa}
+.suggest-chip.sel{border-color:var(--green);background:var(--green-bg)}
+.suggest-chip input[type=checkbox]{accent-color:var(--green);width:14px;height:14px;flex-shrink:0;margin-top:2px}
+.suggest-chip-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.suggest-chip-meta{font-size:11px;color:var(--text3);line-height:1.4}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:16px;right:16px;background:white;border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;font-size:12px;color:var(--text);z-index:999;display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);transform:translateY(60px);opacity:0;transition:all .28s cubic-bezier(.34,1.56,.64,1);font-weight:600}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* ── STAT ROW (like Salesloft summary row) ── */
+.stat-row{display:flex;gap:0;background:white;border:1px solid var(--border);border-radius:var(--r2);margin-bottom:16px;overflow:hidden}
+.stat-cell{flex:1;padding:12px 16px;border-right:1px solid var(--border);text-align:center}
+.stat-cell:last-child{border-right:none}
+.stat-val{font-size:20px;font-weight:700;color:var(--text);line-height:1}
+.stat-val.green{color:var(--green)}.stat-val.blue{color:var(--blue)}.stat-val.brown{color:var(--brown)}
+.stat-lbl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-top:3px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="wordmark"><div class="wm-icon">⚡</div>AI-Sales<span class="wm-sub">Wizard</span></div>
+  </div>
+  <div class="sb-sect">Workspace</div>
+  <div class="nav-item active" id="nav-rep" onclick="showPanel('rep')"><span class="nav-ico">👤</span>Rep Profile</div>
+  <div class="nav-item" id="nav-prods" onclick="showPanel('products')"><span class="nav-ico">📦</span>Products<span class="nav-bdg" id="prod-badge">0</span></div>
+  <div class="sb-sect" style="margin-top:4px">My Products</div>
+  <div class="sb-scroll">
+    <div id="prod-nav-list"></div>
+    <button class="btn-addprod" onclick="openNewProdModal()">+ Add product</button>
+  </div>
+  <div class="sb-foot">
+    <div class="comp-row"><span>Playbook</span><span id="comp-pct">0%</span></div>
+    <div class="comp-track"><div class="comp-fill" id="comp-fill" style="width:0%"></div></div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:2px" id="aisw-user-name"></div>
+      <div style="font-size:10px;color:var(--text3)" id="aisw-usage-badge"></div>
+      <div style="margin-top:6px;display:flex;gap:6px">
+        <span style="font-size:11px;color:var(--red);cursor:pointer;font-weight:600" onclick="if(window.AISW)AISW.logout()">Sign Out</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- REP PANEL -->
+  <div class="panel active" id="panel-rep">
+    <div class="mhdr">
+      <div class="mhdr-left">
+        <div class="pg-eye">Foundation</div>
+        <div class="pg-title">Rep Profile</div>
+        <div class="pg-sub">How you sell — Claude reads this before every dossier.</div>
+      </div>
+      <div class="hdr-acts"><button class="btn btn-blue" onclick="openAutoFillModal()" style="margin-right:4px">⚡ Auto-Fill from Web</button><button class="btn btn-primary" onclick="saveRep()">Save Profile</button></div>
+    </div>
+    <div class="mbody">
+
+      <!-- Summary stat row -->
+      <div class="stat-row" id="rep-stat-row">
+        <div class="stat-cell"><div class="stat-val green" id="stat-methods">—</div><div class="stat-lbl">Methodologies</div></div>
+        <div class="stat-cell"><div class="stat-val blue" id="stat-quota">—</div><div class="stat-lbl">Annual Quota</div></div>
+        <div class="stat-cell"><div class="stat-val brown" id="stat-prods">0</div><div class="stat-lbl">Products</div></div>
+        <div class="stat-cell"><div class="stat-val" id="stat-personas">0</div><div class="stat-lbl">Total Personas</div></div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0"><div class="sdiv-lbl">Basic Info</div><div class="sdiv-line"></div></div>
+        <div class="g2">
+          <div class="fg"><label class="fl">Your name</label><input type="text" id="rep-name" placeholder="Michael Weinstein" /></div>
+          <div class="fg"><label class="fl">Company</label><input type="text" id="rep-company" placeholder="Quadient" /></div>
+        </div>
+        <div class="g3">
+          <div class="fg"><label class="fl">Annual quota</label><div class="dollar-wrap"><input type="number" id="rep-quota" placeholder="1200000" min="0" step="1000" oninput="updateStats()" /></div></div>
+          <div class="fg"><label class="fl">Territory</label><input type="text" id="rep-territory" placeholder="Midwest / Remote" /></div>
+          <div class="fg"><label class="fl">Years of experience</label><input type="text" id="rep-exp" placeholder="e.g. 12 years" /></div>
+        </div>
+        <div class="g2">
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">LinkedIn Profile URL</label>
+            <input type="text" id="rep-linkedin" placeholder="https://linkedin.com/in/yourname" />
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Industries of expertise</label>
+            <div class="tag-wrap" id="rep-ind-wrap"><input class="tag-inp" id="rep-ind-inp" placeholder="Type industry, press Enter..." /></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0"><div class="sdiv-lbl">API Keys</div><div class="sdiv-line"></div></div>
+        <div class="fh" style="margin-bottom:14px">Three keys, three jobs. Gemini (free) powers the AI Coach. Serper (free) fetches live web data for Auto-Fill. Anthropic powers dossier generation (~$0.05/dossier).</div>
+        <div class="g2">
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl" style="display:flex;align-items:center;gap:6px">
+              Gemini API Key
+              <span style="font-size:9px;font-weight:700;background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);padding:1px 6px;border-radius:10px">FREE</span>
+            </label>
+            <div class="fh" style="margin-bottom:5px">AI Coach — <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--blue);font-style:normal;font-weight:600">get one free at aistudio.google.com →</a></div>
+            <div class="api-key-wrap">
+              <input type="password" id="gemini-apikey" placeholder="AIza..." oninput="checkGeminiKey()" />
+              <span class="api-toggle" onclick="toggleVis('gemini-apikey',this)">Show</span>
+            </div>
+            <div class="api-status" id="gemini-status">
+              <div class="api-dot" style="background:var(--border2)"></div>
+              <span style="color:var(--text3)">No key — AI Coach needs this</span>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl" style="display:flex;align-items:center;gap:6px">
+              Groq API Key
+              <span style="font-size:9px;font-weight:700;background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);padding:1px 6px;border-radius:10px">FREE — FAST FALLBACK</span>
+            </label>
+            <div class="fh" style="margin-bottom:5px">Fastest free option — <a href="https://console.groq.com/keys" target="_blank" style="color:var(--blue);font-style:normal;font-weight:600">console.groq.com/keys →</a> (Llama 3, free tier)</div>
+            <div class="api-key-wrap">
+              <input type="password" id="groq-apikey" placeholder="gsk_..." oninput="checkGroqKey()" />
+              <span class="api-toggle" onclick="toggleVis('groq-apikey',this)">Show</span>
+            </div>
+            <div class="api-status" id="groq-status">
+              <div class="api-dot" style="background:var(--border2)"></div>
+              <span style="color:var(--text3)">No key — great free fallback when Gemini is busy</span>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl" style="display:flex;align-items:center;gap:6px">
+              OpenAI API Key
+              <span style="font-size:9px;font-weight:700;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b);padding:1px 6px;border-radius:10px">PAY-AS-YOU-GO</span>
+            </label>
+            <div class="fh" style="margin-bottom:5px">~$0.01–0.03/run — <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--blue);font-style:normal;font-weight:600">platform.openai.com/api-keys →</a></div>
+            <div class="api-key-wrap">
+              <input type="password" id="openai-apikey" placeholder="sk-..." oninput="checkOpenAIKey()" />
+              <span class="api-toggle" onclick="toggleVis('openai-apikey',this)">Show</span>
+            </div>
+            <div class="api-status" id="openai-status">
+              <div class="api-dot" style="background:var(--border2)"></div>
+              <span style="color:var(--text3)">No key — optional paid fallback</span>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl" style="display:flex;align-items:center;gap:6px">
+              Anthropic API Key
+              <span style="font-size:9px;font-weight:700;background:var(--brown-bg);color:var(--brown);border:1px solid var(--brown-b);padding:1px 6px;border-radius:10px">DOSSIERS</span>
+            </label>
+            <div class="fh" style="margin-bottom:5px">Best quality dossiers — <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue);font-style:normal;font-weight:600">console.anthropic.com →</a> (~$0.05/dossier)</div>
+            <div class="api-key-wrap">
+              <input type="password" id="rep-apikey" placeholder="sk-ant-..." oninput="checkApiKey()" />
+              <span class="api-toggle" onclick="toggleVis('rep-apikey',this)">Show</span>
+            </div>
+            <div class="api-status" id="api-status">
+              <div class="api-dot" style="background:var(--border2)"></div>
+              <span style="color:var(--text3)">No key — dossier generation needs this</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:var(--r);padding:10px 12px;margin-top:4px">
+          <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em">&#x26A1; AI Waterfall Order</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6">
+            The AI Coach tries your keys in this order, automatically falling back if one is busy or missing:<br>
+            <strong>1. Gemini 2.5 Flash</strong> (free) &rarr; <strong>2. Groq / Llama 3</strong> (free, fast) &rarr; <strong>3. Gemini 1.5 Flash</strong> (free, stable) &rarr; <strong>4. OpenAI GPT-4o-mini</strong> (paid) &rarr; <strong>5. Claude Sonnet</strong> (paid, best quality)
+          </div>
+        </div>
+
+        <div class="fg" style="margin-top:12px;margin-bottom:0">
+          <label class="fl" style="display:flex;align-items:center;gap:6px">
+            Serper API Key
+            <span style="font-size:9px;font-weight:700;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b);padding:1px 6px;border-radius:10px">AUTO-FILL</span>
+          </label>
+          <div class="fh" style="margin-bottom:5px">Live web search for Auto-Fill &mdash; <a href="https://serper.dev" target="_blank" style="color:var(--blue);font-style:normal;font-weight:600">get 2,500 free searches/month at serper.dev &rarr;</a></div>
+          <div class="api-key-wrap">
+            <input type="password" id="serper-apikey" placeholder="Your Serper key..." oninput="checkSerperKey()" />
+            <span class="api-toggle" onclick="toggleVis('serper-apikey',this)">Show</span>
+          </div>
+          <div class="api-status" id="serper-status">
+            <div class="api-dot" style="background:var(--border2)"></div>
+            <span style="color:var(--text3)">No key &mdash; Auto-Fill needs this to search the web</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0"><div class="sdiv-lbl">Sales Process</div><div class="sdiv-line"></div></div>
+        <div class="fh" style="margin-bottom:11px">How your deals work. Claude uses this to shape call structure and discovery questions.</div>
+        <div class="proc-grid" id="proc-grid">
+          <div class="proc-card" data-flag="discovery" onclick="toggleProc(this)"><div class="proc-icon">🔍</div><div class="proc-lbl">I do discovery</div></div>
+          <div class="proc-card" data-flag="se" onclick="toggleProc(this)"><div class="proc-icon">⚙️</div><div class="proc-lbl">Need Sales Engineer</div></div>
+          <div class="proc-card" data-flag="demo" onclick="toggleProc(this)"><div class="proc-icon">🖥️</div><div class="proc-lbl">Demo required</div></div>
+          <div class="proc-card" data-flag="pilot" onclick="toggleProc(this)"><div class="proc-icon">🧪</div><div class="proc-lbl">POC / Pilot typical</div></div>
+          <div class="proc-card" data-flag="committee" onclick="toggleProc(this)"><div class="proc-icon">👥</div><div class="proc-lbl">Buying committee</div></div>
+          <div class="proc-card" data-flag="multithreaded" onclick="toggleProc(this)"><div class="proc-icon">🕸️</div><div class="proc-lbl">Multi-threaded</div></div>
+        </div>
+        <div class="g2" style="margin-top:12px">
+          <div class="fg"><label class="fl">Avg # of stakeholders</label><input type="text" id="rep-stakeholders" placeholder="e.g. 3–6 people" /></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Typical deal stages</label><input type="text" id="rep-stages" placeholder="e.g. Disco → Demo → POC → Proposal → Close" /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0"><div class="sdiv-lbl">Methodology — Rank Your Top 3</div><div class="sdiv-line"></div></div>
+        <div class="fh" style="margin-bottom:11px">Click to rank. #1 shapes every opener. Click ✕ to remove.</div>
+        <div class="meth-list" id="meth-list"></div>
+        <div id="meth-hint" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0"><div class="sdiv-lbl">Tone & Style</div><div class="sdiv-line"></div></div>
+        <div class="tone-grid" id="tone-grid"></div>
+        <div class="fg" style="margin-bottom:0">
+          <label class="fl">Anything else Claude should know?</label>
+          <textarea id="rep-notes" rows="3" placeholder="e.g. I never pitch on a first call. I always try to get to the economic buyer by meeting 2. I lead with a reframe, not a question..."></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PRODUCTS OVERVIEW -->
+  <div class="panel" id="panel-products">
+    <div class="mhdr">
+      <div class="mhdr-left"><div class="pg-eye">Arsenal</div><div class="pg-title">Products</div><div class="pg-sub">What you sell, who buys it, and why they care.</div></div>
+      <div class="hdr-acts"><button class="btn btn-primary" onclick="openNewProdModal()">+ Add Product</button></div>
+    </div>
+    <div class="mbody"><div class="prod-grid" id="prod-overview-grid"></div></div>
+  </div>
+
+  <!-- PRODUCT DETAIL -->
+  <div class="panel" id="panel-prod">
+    <div class="mhdr">
+      <div class="mhdr-left">
+        <div class="pg-eye" id="pd-eye">Product</div>
+        <div class="pg-title" id="pd-title">—</div>
+        <div class="pg-sub" id="pd-sub">—</div>
+      </div>
+      <div class="hdr-acts">
+        <button class="btn btn-ghost btn-sm" onclick="showPanel('products')">← All Products</button>
+        <button class="btn btn-danger btn-sm" id="pd-del">Delete</button>
+        <button class="btn btn-primary btn-sm" onclick="saveProd()">Save Product</button>
+      </div>
+    </div>
+    <div class="mbody">
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0"><div class="sdiv-lbl">Product Basics</div><div class="sdiv-line"></div></div>
+        <div class="g2">
+          <div class="fg"><label class="fl">Product / Service name</label><input type="text" id="pd-name" oninput="updateProdHdr()" placeholder="e.g. AP Automation Suite" /></div>
+          <div class="fg"><label class="fl">Category</label><input type="text" id="pd-cat" placeholder="e.g. AP Automation, CPQ, Consulting..." /></div>
+        </div>
+
+        <!-- Type selector -->
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Type</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="pd-type-selector">
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;background:white;transition:all .12s" id="pdtype-saas">
+              <input type="radio" name="pd-type" id="pd-type" value="SaaS / Subscription" style="accent-color:var(--blue)" /> SaaS / Subscription
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;background:white;transition:all .12s" id="pdtype-platform">
+              <input type="radio" name="pd-type" value="Platform / Marketplace" style="accent-color:var(--blue)" /> Platform / Marketplace
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;background:white;transition:all .12s" id="pdtype-services">
+              <input type="radio" name="pd-type" value="Professional Services" style="accent-color:var(--blue)" /> Professional Services
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;background:white;transition:all .12s" id="pdtype-managed">
+              <input type="radio" name="pd-type" value="Managed Service" style="accent-color:var(--blue)" /> Managed Service
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;background:white;transition:all .12s" id="pdtype-hw">
+              <input type="radio" name="pd-type" value="Hardware / Device" style="accent-color:var(--blue)" /> Hardware / Device
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;background:white;transition:all .12s" id="pdtype-data">
+              <input type="radio" name="pd-type" value="Data / Intelligence" style="accent-color:var(--blue)" /> Data / Intelligence
+            </label>
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">What does it do? (plain English — cocktail party version)</label>
+          <textarea id="pd-what" rows="2" placeholder="e.g. We give commercial real estate brokers real-time market data and analytics so they can win more pitches and advise clients with confidence."></textarea>
+        </div>
+        <div class="g3">
+          <div class="fg"><label class="fl">Avg deal / contract size</label><div class="dollar-wrap"><input type="number" id="pd-deal" placeholder="45000" min="0" /></div></div>
+          <div class="fg"><label class="fl">Sales cycle</label><input type="text" id="pd-cycle" placeholder="60–90 days" /></div>
+          <div class="fg"><label class="fl">Ideal company size</label><input type="text" id="pd-cosize" placeholder="200–2,000 employees" /></div>
+        </div>
+        <div class="g2" style="margin-top:4px">
+          <div class="fg">
+            <label class="fl">Implementation / onboarding fee <span class="fh" style="font-style:normal;text-transform:none;letter-spacing:0;font-size:10px">(if any)</span></label>
+            <div class="dollar-wrap"><input type="number" id="pd-impl-fee" placeholder="0" min="0" /></div>
+          </div>
+          <div class="fg">
+            <label class="fl">Integration partners / ecosystem</label>
+            <input type="text" id="pd-integrations" placeholder="e.g. Salesforce, MRI, Yardi, SAP..." />
+          </div>
+        </div>
+        <div class="fg" style="margin-bottom:0;margin-top:4px">
+          <label class="fl">Industries</label>
+          <div class="tag-wrap" id="pd-ind-wrap"><input class="tag-inp" id="pd-ind-inp" placeholder="Manufacturing, Distribution, Healthcare..." /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0">
+          <div class="sdiv-lbl">Pain Library</div><div class="sdiv-line"></div>
+          <div class="sdiv-act" style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" id="suggest-pain-btn" onclick="suggestSection('pain')">&#x26A1; AI Suggest</button>
+            <button class="btn btn-brown btn-sm" onclick="addPain()">+ Add Pain</button>
+          </div>
+        </div>
+        <div class="fh" style="margin-bottom:12px">Each pain/solution pair is a weapon. Personas inherit and rank which pains hit hardest for their role.</div>
+        <div id="pain-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0">
+          <div class="sdiv-lbl">Buying Triggers</div><div class="sdiv-line"></div>
+          <div class="sdiv-act">
+            <button class="btn btn-ghost btn-sm" id="suggest-triggers-btn" onclick="suggestSection('triggers')">&#x26A1; AI Suggest</button>
+          </div>
+        </div>
+        <div class="fh" style="margin-bottom:8px">Events that signal a company is in an active buying window right now.</div>
+        <div class="tag-wrap" id="pd-trig-wrap"><input class="tag-inp" id="pd-trig-inp" placeholder="New CFO hired, recent audit finding, acquisition, rapid headcount growth..." /></div>
+        <div class="sdiv" style="margin-top:16px"><div class="sdiv-lbl">ROI &amp; Proof Metrics</div><div class="sdiv-line"></div></div>
+        <div class="tag-wrap" id="pd-roi-wrap"><input class="tag-inp" id="pd-roi-inp" placeholder="65% reduction in processing time, avg 14-day close → 7 days..." /></div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0">
+          <div class="sdiv-lbl">Win Stories</div><div class="sdiv-line"></div>
+          <div class="sdiv-act"><button class="btn btn-ghost btn-sm" onclick="addWin()">+ Add</button></div>
+        </div>
+        <div id="win-list"></div>
+
+        <div class="sdiv">
+          <div class="sdiv-lbl">Objections</div><div class="sdiv-line"></div>
+          <div class="sdiv-act" style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" id="suggest-obj-btn" onclick="suggestSection('objections')">&#x26A1; AI Suggest</button>
+            <button class="btn btn-ghost btn-sm" onclick="addObj()">+ Add</button>
+          </div>
+        </div>
+        <div id="obj-list"></div>
+
+        <div class="sdiv">
+          <div class="sdiv-lbl">Competition</div><div class="sdiv-line"></div>
+          <div class="sdiv-act" style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" id="suggest-comp-btn" onclick="suggestSection('competition')">&#x26A1; AI Suggest</button>
+            <button class="btn btn-ghost btn-sm" onclick="addComp()">+ Add</button>
+          </div>
+        </div>
+        <div id="comp-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="sdiv" style="margin-top:0">
+          <div class="sdiv-lbl">Company Types</div><div class="sdiv-line"></div>
+          <div class="sdiv-act" style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" id="cotype-autofill-btn" onclick="suggestCompanyTypes()">&#x26A1; Suggest</button>
+            <button class="btn btn-blue btn-sm" onclick="openCoTypeModal(null)">+ Add Type</button>
+          </div>
+        </div>
+        <div class="fh" style="margin-bottom:12px">Define the types of companies that buy this product. Each type gets its own set of personas &mdash; because the same title at a national enterprise vs. a regional boutique is a completely different buyer.</div>
+        <div id="cotype-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- CHAT PANEL -->
+<aside class="chat-panel">
+  <div class="chat-hdr">
+    <div class="chat-title"><div class="ai-dot"></div>AI Sales Coach</div>
+    <div class="chat-ctx-lbl" id="chat-ctx-lbl">Interviewing you about your Rep Profile</div>
+  </div>
+  <div class="chat-msgs" id="chat-msgs"></div>
+  <div class="chat-sugg" id="chat-sugg"></div>
+  <div class="chat-inp-row">
+    <textarea class="chat-inp" id="chat-inp" rows="1" placeholder="Reply to your coach..." onkeydown="chatKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="chat-send" id="chat-send" onclick="sendChat()">↑</button>
+  </div>
+</aside>
+
+</div>
+
+<!-- NEW PRODUCT MODAL -->
+<div class="modal-bd" id="modal-new-prod">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div><div class="modal-title">Add a product</div><div class="modal-sub">Start simple — fill in details after.</div></div>
+      <div class="modal-x" onclick="closeModal('modal-new-prod')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Product name</label><input type="text" id="np-name" placeholder="e.g. AP Automation Suite" /></div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">One-line description</label><input type="text" id="np-desc" placeholder="e.g. Eliminate paper invoices for mid-market finance teams" /></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-prod')">Cancel</button>
+      <button class="btn btn-primary" onclick="createProd()">Create →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PERSONA MODAL -->
+<div class="modal-bd" id="modal-persona">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div><div class="modal-title" id="pm-modal-title">Add a Persona</div><div class="modal-sub">Who buys this product and how do they think?</div></div>
+      <div class="modal-x" onclick="closeModal('modal-persona')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Title(s)</label><input type="text" id="pm-titles" placeholder="e.g. CFO, VP Finance, Chief Financial Officer" /></div>
+      <div class="fg">
+        <label class="fl">Role in the deal</label>
+        <div class="role-sel">
+          <div class="role-opt" data-r="buyer" onclick="selRole('buyer')"><div class="role-icon">💰</div><div class="role-lbl">Econ. Buyer</div></div>
+          <div class="role-opt" data-r="champion" onclick="selRole('champion')"><div class="role-icon">🏆</div><div class="role-lbl">Champion</div></div>
+          <div class="role-opt" data-r="influencer" onclick="selRole('influencer')"><div class="role-icon">📣</div><div class="role-lbl">Influencer</div></div>
+          <div class="role-opt" data-r="blocker" onclick="selRole('blocker')"><div class="role-icon">🚫</div><div class="role-lbl">Blocker</div></div>
+        </div>
+        <input type="hidden" id="pm-role" />
+      </div>
+      <div class="fg">
+        <label class="fl">Budget authority (1 = none → 5 = signs the check)</label>
+        <div class="auth-sel">
+          <div class="auth-btn" onclick="chgAuth(-1)">−</div>
+          <div class="auth-pips" id="pm-pips">
+            <div class="auth-pip" data-p="1"></div><div class="auth-pip" data-p="2"></div>
+            <div class="auth-pip" data-p="3"></div><div class="auth-pip" data-p="4"></div><div class="auth-pip" data-p="5"></div>
+          </div>
+          <div class="auth-btn" onclick="chgAuth(1)">+</div>
+          <span class="auth-lbl" id="pm-auth-lbl">Not set</span>
+        </div>
+        <input type="hidden" id="pm-auth" value="0" />
+      </div>
+      <div class="fg"><label class="fl">What keeps them up at night?</label><textarea id="pm-cares" rows="2" placeholder="e.g. Getting blindsided by an invoice question at 4pm. Missing early-pay discounts the CFO doesn't know about."></textarea></div>
+      <div class="fg"><label class="fl">How do they prefer to be sold to?</label><textarea id="pm-style" rows="2" placeholder="e.g. Data first. ROI in 2 minutes or you've lost them."></textarea></div>
+      <div class="fg">
+        <label class="fl">Language that resonates</label>
+        <div class="tag-wrap" id="pm-lang-wrap"><input class="tag-inp" id="pm-lang-inp" placeholder="cash visibility, audit trail, close speed..." /></div>
+      </div>
+      <div class="fg"><label class="fl">Their specific objections</label><textarea id="pm-obj" rows="2" placeholder="e.g. 'We already have a process.' / 'IT won't prioritize this.'"></textarea></div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">Red flags — when are they a bad fit?</label><textarea id="pm-rf" rows="2" placeholder="e.g. No budget authority. Never bought software before."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-persona')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePersona()">Save Persona</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO-FILL MODAL -->
+<div class="modal-bd" id="modal-autofill">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">⚡ Auto-Fill Your Playbook</div>
+        <div class="modal-sub">We’ll search the web and pre-populate your playbook. You review everything before it saves.</div>
+      </div>
+      <div class="modal-x" onclick="closeModal('modal-autofill')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <label class="fl">Your company</label>
+        <input type="text" id="af-company" placeholder="e.g. CoStar Group, Quadient, Salesforce..." />
+      </div>
+      <div class="fg">
+        <label class="fl">Your role + what you sell</label>
+        <div class="fh" style="margin-bottom:5px">Be specific &mdash; this shapes everything Gemini generates.</div>
+        <input type="text" id="af-role" placeholder="e.g. I sell CoStar Suite to commercial real estate brokers and owners" />
+      </div>
+      <div style="background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:var(--r);padding:10px 12px;margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">What happens next</div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="font-size:12px;color:var(--text2);display:flex;align-items:flex-start;gap:7px">
+            <span style="color:var(--blue);font-weight:700;flex-shrink:0">Stage 1</span>
+            Serper searches the web &rarr; Gemini extracts company overview, products, industries, competitors. You review and confirm.
+          </div>
+          <div style="font-size:12px;color:var(--text2);display:flex;align-items:flex-start;gap:7px">
+            <span style="color:var(--green);font-weight:700;flex-shrink:0">Stage 2</span>
+            Using your confirmed products &rarr; Gemini builds personas, pain points, buying triggers, and objections per product.
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#f8f9fa;border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">AI Model &amp; Cost</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:7px 9px;border-radius:var(--r);border:1px solid var(--border);background:white;transition:border-color .12s" id="model-opt-flash" onclick="selectModel('gemini-2.5-flash')">
+            <input type="radio" name="af-model" value="gemini-2.5-flash" checked style="margin-top:2px;accent-color:var(--green)" />
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">Gemini 2.5 Flash <span style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700">FREE</span></div>
+              <div style="font-size:11px;color:var(--text3);margin-top:1px">Best quality. Free tier. May be slow during peak hours — retry if it times out.</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:7px 9px;border-radius:var(--r);border:1px solid var(--border);background:white;transition:border-color .12s" id="model-opt-flash-lite" onclick="selectModel('gemini-2.0-flash-lite')">
+            <input type="radio" name="af-model" value="gemini-2.0-flash-lite" style="margin-top:2px;accent-color:var(--green)" />
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">Gemini 2.0 Flash Lite <span style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-b);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700">FREE</span></div>
+              <div style="font-size:11px;color:var(--text3);margin-top:1px">Faster, lighter. Free tier. Less detailed output but rarely overloaded. Good fallback.</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:7px 9px;border-radius:var(--r);border:1px solid var(--border);background:white;transition:border-color .12s" id="model-opt-claude" onclick="selectModel('claude')">
+            <input type="radio" name="af-model" value="claude" style="margin-top:2px;accent-color:var(--blue)" />
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--text)">Claude Sonnet <span style="background:var(--brown-bg);color:var(--brown);border:1px solid var(--brown-b);border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700">~$0.02–0.05</span></div>
+              <div style="font-size:11px;color:var(--text3);margin-top:1px">Highest quality output. Uses your Anthropic key. Best for complex or niche companies. Pennies per run.</div>
+            </div>
+          </label>
+        </div>
+        <div style="font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:8px">
+          <strong>Serper cost:</strong> 4 searches per auto-fill run. Free tier = 2,500/month, so roughly <strong>625 free auto-fills</strong> before you'd pay anything.
+        </div>
+      </div>
+      <div id="af-key-warning" style="display:none;background:var(--brown-bg);border:1px solid var(--brown-b);border-radius:var(--r);padding:9px 12px;margin-top:8px;font-size:12px;color:var(--brown)"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-autofill')">Cancel</button>
+      <button class="btn btn-primary" id="af-start-btn" onclick="startAutoFillStage1()">⚡ Start Auto-Fill</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO-FILL PREVIEW MODAL (Stage 1 & 2 results) -->
+<div class="modal-bd" id="modal-af-preview">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="af-preview-title">Reviewing Auto-Fill Results</div>
+        <div class="modal-sub" id="af-preview-sub">Review what we found. Edit anything before it goes into your playbook.</div>
+      </div>
+      <div class="modal-x" onclick="closeModal('modal-af-preview')">✕</div>
+    </div>
+    <div class="modal-body" id="af-preview-body" style="max-height:60vh;overflow-y:auto">
+      <div style="text-align:center;padding:32px;color:var(--text3)">
+        <div style="font-size:28px;margin-bottom:10px">⏳</div>
+        <div style="font-size:13px">Searching the web and generating your playbook draft...</div>
+        <div style="font-size:11px;margin-top:6px;color:var(--text3)" id="af-progress-lbl">Starting search...</div>
+      </div>
+    </div>
+    <div class="modal-foot" id="af-preview-foot" style="display:none">
+      <button class="btn btn-ghost" onclick="closeModal('modal-af-preview')">Cancel</button>
+      <button class="btn btn-primary" id="af-confirm-btn">Confirm &amp; Continue &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI SUGGEST MODAL -->
+<div class="modal-bd" id="modal-suggest">
+  <div class="modal" style="max-width:660px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="suggest-modal-title">&#x26A1; AI Suggestions</div>
+        <div class="modal-sub" id="suggest-modal-sub">Review what AI found. Check the ones you want to add.</div>
+      </div>
+      <div class="modal-x" onclick="closeModal('modal-suggest')">&#x2715;</div>
+    </div>
+    <div class="modal-body" id="suggest-modal-body" style="max-height:55vh;overflow-y:auto">
+      <div style="text-align:center;padding:28px;color:var(--text3)">
+        <div style="font-size:24px;margin-bottom:8px">&#x23F3;</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)" id="suggest-loading-txt">Searching the web...</div>
+        <div style="font-size:11px;margin-top:5px;color:var(--text3)" id="suggest-loading-sub"></div>
+      </div>
+    </div>
+    <div class="modal-foot" id="suggest-modal-foot" style="display:none">
+      <button class="btn btn-ghost" onclick="closeModal('modal-suggest')">Cancel</button>
+      <button class="btn btn-primary" id="suggest-apply-btn">Add Selected to Playbook</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg">Saved</span></div>
+
+<script>
+var S={rep:{name:'',company:'',quota:'',territory:'',exp:'',industries:[],process:{},stakeholders:'',stages:'',methodology:[],tone:'',notes:''},products:[],activeProd:null};
+var tags={};
+var authLevel=0,editPersonaIdx=null,painCount=0,winCount=0,objCount=0,compCount=0;
+
+// ── INDUSTRY → PERSONA LIBRARY ──
+// Industry library — supports optional subtypes
+// Structure: { 'Industry': { _personas:[...], 'Subtype': [...] } }
+// If no subtypes, just _personas at top level
+var INDUSTRY_PERSONAS = {
+
+  'Manufacturing': { _personas:[
+    {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Cost reduction, cash flow, audit risk, working capital optimization'},
+    {titles:'Controller / Accounting Manager',role:'champion',authority:2,cares:'Month-end close speed, manual workload, duplicate payments, compliance'},
+    {titles:'VP Operations / COO',role:'influencer',authority:3,cares:'Process efficiency, headcount justification, throughput'},
+    {titles:'Plant Manager',role:'influencer',authority:2,cares:'Operational continuity, vendor relationships, procurement efficiency'},
+    {titles:'IT Director / CIO',role:'influencer',authority:2,cares:'System integration, security, implementation risk'}
+  ]},
+
+  'Distribution / Logistics': { _personas:[
+    {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Working capital, freight cost visibility, invoice accuracy'},
+    {titles:'Controller',role:'champion',authority:2,cares:'Invoice volume, carrier billing disputes, close speed'},
+    {titles:'VP Supply Chain / COO',role:'influencer',authority:3,cares:'Vendor performance, cost-per-shipment, process bottlenecks'},
+    {titles:'Procurement Manager',role:'champion',authority:2,cares:'PO matching, contract compliance, vendor onboarding'},
+    {titles:'IT Director',role:'influencer',authority:2,cares:'ERP integration, data accuracy, system reliability'}
+  ]},
+
+  'Healthcare': {
+    _personas:[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Revenue cycle performance, cost per claim, regulatory compliance, margin'},
+      {titles:'COO / VP Operations',role:'influencer',authority:3,cares:'Patient throughput, staff utilization, operational efficiency'},
+      {titles:'IT Director / CIO',role:'influencer',authority:2,cares:'HL7/FHIR integration, security, system uptime'}
+    ],
+    'Hospital System / Health Network':[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'System-wide cost reduction, revenue cycle optimization, payer mix management'},
+      {titles:'Revenue Cycle Director',role:'champion',authority:3,cares:'AR days, denial rates, billing accuracy, coding compliance'},
+      {titles:'COO',role:'influencer',authority:3,cares:'Labor costs, throughput, supply chain efficiency'},
+      {titles:'Chief Medical Officer',role:'influencer',authority:3,cares:'Clinical outcomes, physician productivity, care quality'},
+      {titles:'Compliance Officer',role:'influencer',authority:2,cares:'HIPAA, OIG compliance, audit exposure'}
+    ],
+    'Physician Group / Ambulatory':[
+      {titles:'Practice Administrator / CEO',role:'buyer',authority:5,cares:'Revenue per visit, overhead ratio, provider productivity'},
+      {titles:'Billing Manager / RCM Director',role:'champion',authority:3,cares:'Clean claim rate, days in AR, denial management, coding accuracy'},
+      {titles:'CFO / Finance Director',role:'buyer',authority:4,cares:'Cash flow, payer contract performance, cost control'},
+      {titles:'COO / Operations Director',role:'influencer',authority:3,cares:'Scheduling efficiency, patient satisfaction, staff workload'},
+      {titles:'IT Manager',role:'influencer',authority:2,cares:'EHR integration, security, HIPAA compliance'}
+    ],
+    'Senior Living / Long-Term Care':[
+      {titles:'Executive Director / CEO',role:'buyer',authority:5,cares:'Census, occupancy rates, NOI, regulatory compliance'},
+      {titles:'CFO / VP Finance',role:'buyer',authority:4,cares:'Medicare/Medicaid billing, cash flow, labor costs'},
+      {titles:'Director of Nursing / COO',role:'influencer',authority:3,cares:'Staff-to-resident ratios, care quality, survey readiness'},
+      {titles:'Billing / Reimbursement Manager',role:'champion',authority:2,cares:'MDS accuracy, Medicare billing, collection rates'},
+      {titles:'IT Director',role:'influencer',authority:2,cares:'EMR integration, security, compliance documentation'}
+    ]
+  },
+
+  'Real Estate': {
+    _personas:[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Portfolio-level cash flow, NOI optimization, cost control'},
+      {titles:'IT Director',role:'influencer',authority:2,cares:'System integration, data security, platform reliability'}
+    ],
+    'Commercial (CRE)':[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'NOI, portfolio yield, tenant credit risk, debt service coverage'},
+      {titles:'Controller / Accounting Director',role:'champion',authority:3,cares:'CAM reconciliation, lease accounting (ASC 842), close speed, AP volume'},
+      {titles:'Asset Manager',role:'influencer',authority:3,cares:'Property performance vs. proforma, capital expenditure tracking, tenant retention'},
+      {titles:'Property Manager',role:'champion',authority:2,cares:'Vendor invoices, maintenance work orders, tenant billing, lease compliance'},
+      {titles:'Leasing Manager / VP Leasing',role:'influencer',authority:2,cares:'Vacancy rates, deal pipeline, tenant mix, market comps'},
+      {titles:'IT Director',role:'influencer',authority:2,cares:'MRI/Yardi integration, data integrity, user access controls'}
+    ],
+    'Residential (Single-Family / HOA)':[
+      {titles:'Broker / Owner / Principal',role:'buyer',authority:5,cares:'Agent productivity, transaction volume, margin per deal, brand reputation'},
+      {titles:'Operations Manager / COO',role:'champion',authority:3,cares:'Transaction coordination efficiency, compliance, staff workload'},
+      {titles:'CFO / Controller',role:'buyer',authority:4,cares:'Commission accounting, escrow accuracy, P&L by agent or office'},
+      {titles:'HOA Manager / Community Manager',role:'champion',authority:3,cares:'Dues collection, vendor payments, reserve funds, homeowner satisfaction'},
+      {titles:'IT / Systems Manager',role:'influencer',authority:2,cares:'MLS integration, CRM, document management, security'}
+    ],
+    'Multifamily':[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'NOI per unit, rent growth, expense ratio, portfolio-level cash flow, investor reporting'},
+      {titles:'Controller / Accounting Director',role:'champion',authority:3,cares:'AP volume (utilities, vendors, contractors), month-end close, bank reconciliation, audit readiness'},
+      {titles:'VP / Director of Operations',role:'influencer',authority:3,cares:'Occupancy rates, unit turn time, maintenance efficiency, vendor performance'},
+      {titles:'Regional Property Manager',role:'champion',authority:2,cares:'Rent collections, delinquency, maintenance SLAs, resident satisfaction scores'},
+      {titles:'Leasing Manager',role:'influencer',authority:2,cares:'Lead-to-lease conversion, concession management, market rents'},
+      {titles:'IT Director',role:'influencer',authority:2,cares:'Yardi/RealPage/Entrata integration, resident portal, cybersecurity'}
+    ]
+  },
+
+  'Financial Services': {
+    _personas:[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Regulatory compliance, cost efficiency, risk management'},
+      {titles:'Chief Risk Officer',role:'influencer',authority:3,cares:'Exposure, fraud detection, control frameworks'},
+      {titles:'IT / Systems Director',role:'influencer',authority:2,cares:'Integration, security, data governance'}
+    ],
+    'Banking / Credit Union':[
+      {titles:'CFO / EVP Finance',role:'buyer',authority:5,cares:'Net interest margin, cost of funds, regulatory capital ratios, efficiency ratio'},
+      {titles:'Controller / Chief Accounting Officer',role:'champion',authority:3,cares:'CECL compliance, close speed, loan accounting, reconciliation accuracy'},
+      {titles:'Chief Risk Officer',role:'influencer',authority:4,cares:'Credit risk, operational risk, BSA/AML compliance, exam readiness'},
+      {titles:'COO / Chief Banking Officer',role:'influencer',authority:3,cares:'Branch efficiency, digital banking adoption, operational costs'},
+      {titles:'Chief Compliance Officer',role:'influencer',authority:3,cares:'Regulatory exams, CFPB, fair lending, Reg E/Z compliance'}
+    ],
+    'Insurance':[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Combined ratio, loss ratio, premium growth, investment yield, solvency'},
+      {titles:'Controller / Chief Accounting Officer',role:'champion',authority:3,cares:'Statutory accounting, close speed, reinsurance accounting, reserve accuracy'},
+      {titles:'Chief Actuary',role:'influencer',authority:3,cares:'Loss reserving accuracy, pricing models, catastrophe exposure'},
+      {titles:'COO / VP Operations',role:'influencer',authority:3,cares:'Claims efficiency, underwriting throughput, agent productivity'},
+      {titles:'Chief Compliance Officer',role:'influencer',authority:2,cares:'State regulatory filings, market conduct exams, Sarbanes-Oxley'}
+    ],
+    'Private Equity / Investment Management':[
+      {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Fund accounting accuracy, investor reporting, fee calculations, audit readiness'},
+      {titles:'Controller / Fund Accountant',role:'champion',authority:3,cares:'NAV calculations, capital calls, waterfall distributions, LP reporting'},
+      {titles:'Managing Partner / CEO',role:'buyer',authority:5,cares:'LP relationships, portfolio performance, operational efficiency, scalability'},
+      {titles:'COO / Chief of Staff',role:'influencer',authority:3,cares:'Firm operations, compliance, team productivity, vendor management'},
+      {titles:'Compliance Officer',role:'influencer',authority:3,cares:'SEC reporting, ILPA compliance, ADV filings, AML/KYC'}
+    ],
+    'Wealth Management / RIA':[
+      {titles:'Managing Partner / CEO',role:'buyer',authority:5,cares:'AUM growth, advisor productivity, client retention, compliance exposure'},
+      {titles:'CFO / COO',role:'buyer',authority:4,cares:'Fee billing accuracy, custodian reconciliation, overhead management'},
+      {titles:'Chief Compliance Officer',role:'champion',authority:3,cares:'SEC/FINRA exam readiness, Form ADV, fiduciary documentation'},
+      {titles:'Director of Operations',role:'champion',authority:3,cares:'Onboarding efficiency, portfolio accounting, advisor support workflows'},
+      {titles:'IT Director',role:'influencer',authority:2,cares:'CRM/portfolio system integration, data security, business continuity'}
+    ]
+  },
+
+  'Legal': {
+    _personas:[
+      {titles:'Managing Partner / CEO',role:'buyer',authority:5,cares:'Firm profitability, attorney utilization, client retention, competitive positioning'},
+      {titles:'CFO / Finance Director',role:'buyer',authority:4,cares:'Billing realization, AR days, overhead management, partner distributions'},
+      {titles:'IT Director / CIO',role:'influencer',authority:2,cares:'System integration, cybersecurity, remote access, e-discovery support'}
+    ],
+    'AmLaw 200 / Large Firm':[
+      {titles:'CFO / Chief Financial Officer',role:'buyer',authority:5,cares:'Realization rates, partner profitability, lateral ROI, cost per matter, financial reporting'},
+      {titles:'Controller / Director of Finance',role:'champion',authority:3,cares:'Time & billing accuracy, trust accounting (IOLTA), close speed, revenue recognition'},
+      {titles:'COO / Chief Operating Officer',role:'influencer',authority:4,cares:'Firm operations efficiency, vendor management, headcount optimization, space utilization'},
+      {titles:'Director of IT / CIO',role:'influencer',authority:2,cares:'3E/Aderant/Elite integration, cybersecurity (client data), e-discovery, remote work infrastructure'},
+      {titles:'Managing Partner / Chair',role:'buyer',authority:5,cares:'Firm strategy, lateral acquisition, profitability per equity partner, client relationships'}
+    ],
+    'Mid-Size Law Firm':[
+      {titles:'Managing Partner / CEO',role:'buyer',authority:5,cares:'Practice group profitability, associate leverage, billing rates, client development'},
+      {titles:'CFO / Finance Director',role:'buyer',authority:4,cares:'Realization rates, AR collection, trust accounting compliance, overhead ratio'},
+      {titles:'Office Manager / Firm Administrator',role:'champion',authority:3,cares:'Billing workflows, vendor invoices, payroll, day-to-day operations'},
+      {titles:'IT Manager',role:'influencer',authority:2,cares:'Practice management software, document management, cybersecurity'},
+      {titles:'Marketing / BD Director',role:'influencer',authority:2,cares:'Client pipeline, proposal automation, experience management'}
+    ],
+    'Small Firm / Solo Practice':[
+      {titles:'Owner / Managing Attorney',role:'buyer',authority:5,cares:'Revenue per hour, overhead costs, client acquisition, work-life balance'},
+      {titles:'Firm Administrator / Office Manager',role:'champion',authority:3,cares:'Billing accuracy, collections, trust accounting, vendor management'},
+      {titles:'Paralegal / Legal Assistant',role:'influencer',authority:1,cares:'Workflow efficiency, deadline management, document organization'},
+      {titles:'Bookkeeper / Accountant',role:'influencer',authority:2,cares:'IOLTA trust reconciliation, expense tracking, tax compliance'}
+    ]
+  },
+
+  'Accounting / CPA Firms': {
+    _personas:[
+      {titles:'Managing Partner / CEO',role:'buyer',authority:5,cares:'Firm profitability, staff utilization, client retention, growth'},
+      {titles:'CFO / Finance Director',role:'buyer',authority:4,cares:'Billing realization, overhead management, partner distributions'},
+      {titles:'IT Director',role:'influencer',authority:2,cares:'System integration, security, remote access'}
+    ],
+    'Regional / National CPA Firm':[
+      {titles:'Managing Partner / CEO',role:'buyer',authority:5,cares:'Revenue per professional, client retention, practice growth, niche development, merger targets'},
+      {titles:'CFO / Director of Finance',role:'buyer',authority:4,cares:'Billing realization rates, WIP management, AR days, partner comp calculations'},
+      {titles:'COO / Firm Administrator',role:'champion',authority:3,cares:'Staff utilization, workflow efficiency during busy season, vendor management, facilities'},
+      {titles:'Director of IT / CIO',role:'influencer',authority:2,cares:'CCH/Thomson Reuters integration, document management, cybersecurity, remote work'},
+      {titles:'Tax Practice Leader / Audit Partner',role:'influencer',authority:3,cares:'Engagement profitability, staff leverage, client service quality, deadline compliance'}
+    ],
+    'Small / Mid CPA Practice':[
+      {titles:'Owner / Managing Partner',role:'buyer',authority:5,cares:'Hourly realization, staff productivity, client mix, work-life balance during busy season'},
+      {titles:'Office Manager / Practice Administrator',role:'champion',authority:3,cares:'Billing workflows, AP, payroll, scheduling, client onboarding'},
+      {titles:'Senior Accountant / Manager',role:'influencer',authority:2,cares:'Engagement workflow, software efficiency, deadline tracking, client communication'},
+      {titles:'IT Person / Bookkeeper',role:'influencer',authority:1,cares:'Software licensing, backups, basic IT support, QBO/Xero integration'}
+    ],
+    'Outsourced CFO / Bookkeeping Firm':[
+      {titles:'CEO / Founder',role:'buyer',authority:5,cares:'Revenue per client, service scalability, client retention, competitive differentiation'},
+      {titles:'Controller / Director of Client Services',role:'champion',authority:3,cares:'Client deliverable accuracy, close speed, team capacity, workflow standardization'},
+      {titles:'Senior Bookkeeper / Staff Accountant',role:'influencer',authority:2,cares:'Software efficiency, data accuracy, client responsiveness, deadline management'},
+      {titles:'Sales / Business Development',role:'influencer',authority:2,cares:'Prospect pipeline, proposal conversion, client onboarding experience'}
+    ]
+  },
+
+  'Retail': { _personas:[
+    {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Margin, shrink, payment terms, vendor discounts'},
+    {titles:'Controller / AP Manager',role:'champion',authority:2,cares:'Invoice volume, deduction management, vendor compliance'},
+    {titles:'VP Supply Chain / Merchandise',role:'influencer',authority:3,cares:'Vendor performance, inventory accuracy, replenishment speed'},
+    {titles:'COO',role:'influencer',authority:3,cares:'Store operations efficiency, labor cost, fulfillment'},
+    {titles:'IT / Systems Director',role:'influencer',authority:2,cares:'ERP/POS integration, data quality'}
+  ]},
+
+  'Technology / SaaS': { _personas:[
+    {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Burn rate, runway, unit economics, audit readiness'},
+    {titles:'Controller / Head of Accounting',role:'champion',authority:3,cares:'Close speed, ASC 606 compliance, equity accounting'},
+    {titles:'CEO / Founder',role:'buyer',authority:5,cares:'Efficiency, investor readiness, scalability'},
+    {titles:'COO / Head of Operations',role:'influencer',authority:3,cares:'Process automation, vendor management, scaling ops'},
+    {titles:'VP Engineering / CTO',role:'influencer',authority:2,cares:'API integration, security, technical debt'}
+  ]},
+
+  'Construction': { _personas:[
+    {titles:'CFO / VP Finance',role:'buyer',authority:5,cares:'Job costing accuracy, cash flow, subcontractor payments'},
+    {titles:'Controller / Project Accountant',role:'champion',authority:2,cares:'Lien waivers, AIA billing, change order management'},
+    {titles:'COO / VP Operations',role:'influencer',authority:3,cares:'Project margin, subcontractor performance, scheduling'},
+    {titles:'Project Manager',role:'champion',authority:2,cares:'Budget tracking, RFIs, change orders, subcontractor invoices'},
+    {titles:'IT Director',role:'influencer',authority:2,cares:'Procore/Sage integration, mobile access'}
+  ]},
+
+  'Professional Services': { _personas:[
+    {titles:'Managing Partner / CEO',role:'buyer',authority:5,cares:'Profitability per engagement, utilization, client retention'},
+    {titles:'CFO / Finance Director',role:'buyer',authority:4,cares:'Billing efficiency, AR days, expense management'},
+    {titles:'Controller',role:'champion',authority:2,cares:'Time & billing accuracy, WIP, trust accounting'},
+    {titles:'COO / Operations Director',role:'influencer',authority:3,cares:'Staff utilization, workflow efficiency, scalability'},
+    {titles:'IT Director',role:'influencer',authority:2,cares:'System integration, data security, remote access'}
+  ]},
+
+  'Government / Public Sector': { _personas:[
+    {titles:'Finance Director / CFO',role:'buyer',authority:4,cares:'Budget compliance, audit readiness, transparency'},
+    {titles:'Comptroller / Controller',role:'champion',authority:3,cares:'Fund accounting, grant tracking, close accuracy'},
+    {titles:'Procurement Director',role:'champion',authority:3,cares:'Vendor compliance, contract management, bid processes'},
+    {titles:'City Manager / Administrator',role:'buyer',authority:5,cares:'Constituent services, operational efficiency, cost savings'},
+    {titles:'IT Director',role:'influencer',authority:2,cares:'Security, integration with legacy systems, uptime'}
+  ]}
+
+};
+
+// Helper — get all industries and subtypes as flat list for tag suggestions
+function getIndustryKeys(){
+  var keys=[];
+  Object.keys(INDUSTRY_PERSONAS).forEach(function(ind){
+    keys.push(ind);
+    var entry=INDUSTRY_PERSONAS[ind];
+    Object.keys(entry).forEach(function(k){if(k!=='_personas')keys.push(ind+' → '+k);});
+  });
+  return keys;
+}
+
+// Helper — resolve personas from a key (may be 'Industry' or 'Industry → Subtype')
+function resolvePersonas(key){
+  if(key.indexOf(' → ')>=0){
+    var parts=key.split(' → ');
+    var ind=parts[0].trim(),sub=parts[1].trim();
+    var entry=INDUSTRY_PERSONAS[ind];
+    return entry&&entry[sub]?entry[sub]:(entry&&entry._personas?entry._personas:[]);
+  }
+  var entry=INDUSTRY_PERSONAS[key];
+  if(!entry)return[];
+  return entry._personas||[];
+}
+
+// Helper — get subtypes for an industry (empty if none)
+function getSubtypes(ind){
+  var entry=INDUSTRY_PERSONAS[ind];if(!entry)return[];
+  return Object.keys(entry).filter(function(k){return k!=='_personas';});
+}
+
+var INTENSITY_LEVELS = ['Critical','High','Medium','Low'];
+
+var PROD_COLORS=['#156082','#4EA72E','#795F16','#c0392b','#8e44ad','#2980b9'];
+
+var METHODS=[
+  {id:'sandler',name:'Sandler',desc:'Qualify hard. No-pressure close. Pain → budget → decision.'},
+  {id:'meddic',name:'MEDDIC / MEDDPICC',desc:'Metrics, Economic Buyer, Decision criteria, Champion.'},
+  {id:'challenger',name:'Challenger Sale',desc:'Teach, tailor, take control. Lead with insight.'},
+  {id:'solution',name:'Solution Selling',desc:'Diagnose before prescribing. Needs-based approach.'},
+  {id:'spin',name:'SPIN Selling',desc:'Situation → Problem → Implication → Need-payoff.'},
+  {id:'bant',name:'BANT',desc:'Budget, Authority, Need, Timeline. Fast qualification.'},
+  {id:'value',name:'Value Selling',desc:'ROI-centric. Build the business case together.'},
+  {id:'cotm',name:'Command of the Message',desc:'Own the narrative. Before/after/required capabilities.'},
+  {id:'custom',name:'My Own Approach',desc:'Describe your style in your own words below.'}
+];
+
+var MHINTS={
+  sandler:'Claude will frame openers around uncovering pain early, qualifying budget fast, and reversing pressure on the prospect.',
+  meddic:'Claude will prioritize identifying the economic buyer, required capabilities, and champion strength before anything else.',
+  challenger:'Claude will lead with a commercial teaching insight before probing pain — reframe first, diagnose second.',
+  solution:'Claude will focus on diagnosing before prescribing — questions first, product second, always.',
+  spin:'Claude will structure discovery as Situation → Problem → Implication → Need-payoff questions.',
+  bant:'Claude will help you quickly qualify budget, authority, need, and timeline before going deep.',
+  value:'Claude will anchor every conversation to ROI and help the buyer build their internal business case.',
+  cotm:'Claude will help you own the narrative — before state, after state, required capabilities framework.',
+  custom:'Claude will adapt its framing based on the notes you provide below.'
+};
+
+var TONES=['Consultative / low-pressure','Direct / get to the point fast','Data-driven / metrics first','Relationship first / warm','Challenger / provocative','Storyteller / narrative','Peer-to-peer / no hierarchy','Executive / boardroom level'];
+
+function renderMethods(){
+  var list=document.getElementById('meth-list');list.innerHTML='';
+  METHODS.forEach(function(m){
+    var rank=S.rep.methodology.indexOf(m.id);
+    var cls='meth-row'+(rank===0?' r1':rank===1?' r2':rank===2?' r3':'');
+    var d=document.createElement('div');d.className=cls;
+    d.onclick=function(){toggleMethod(m.id);};
+    d.innerHTML='<div class="rank-bdg">'+(rank>=0?rank+1:'')+'</div><div class="meth-info"><div class="meth-name">'+m.name+'</div><div class="meth-desc">'+m.desc+'</div></div>';
+    if(rank>=0){var x=document.createElement('div');x.style.cssText='font-size:11px;color:var(--text3);cursor:pointer;padding:4px 6px;font-weight:700';x.textContent='✕';x.onclick=function(e){e.stopPropagation();removeMethod(m.id);};d.appendChild(x);}
+    list.appendChild(d);
+  });
+  var hint=document.getElementById('meth-hint');
+  if(S.rep.methodology.length>0){hint.className='meth-hint';hint.textContent=MHINTS[S.rep.methodology[0]]||'';}
+  else{hint.className='';hint.textContent='';}
+  updateStats();
+}
+
+function toggleMethod(id){if(S.rep.methodology.indexOf(id)>=0)return;if(S.rep.methodology.length>=3){toast('Max 3 methodologies');return;}S.rep.methodology.push(id);renderMethods();}
+function removeMethod(id){S.rep.methodology=S.rep.methodology.filter(function(m){return m!==id;});renderMethods();}
+
+function renderTones(){
+  var g=document.getElementById('tone-grid');g.innerHTML='';
+  TONES.forEach(function(t){
+    var d=document.createElement('div');d.className='tone-pill'+(S.rep.tone===t?' on':'');
+    d.textContent=t;d.onclick=function(){S.rep.tone=t;renderTones();};g.appendChild(d);
+  });
+}
+
+function toggleProc(el){el.classList.toggle('on');S.rep.process[el.dataset.flag]=el.classList.contains('on');}
+function restoreProc(){document.querySelectorAll('.proc-card').forEach(function(el){el.classList.toggle('on',!!S.rep.process[el.dataset.flag]);});}
+
+function initTag(fid){
+  if(!tags[fid])tags[fid]=[];
+  var wrap=document.getElementById(fid+'-wrap'),inp=document.getElementById(fid+'-inp');
+  if(!wrap||!inp)return;
+  wrap.addEventListener('click',function(){inp.focus();});
+  inp.addEventListener('keydown',function(e){
+    if((e.key==='Enter'||e.key===',')&&inp.value.trim()){e.preventDefault();addTag(fid,inp.value.trim());inp.value='';}
+    if(e.key==='Backspace'&&!inp.value&&tags[fid].length)rmTag(fid,tags[fid].length-1);
+  });
+}
+function addTag(fid,t){if(tags[fid].indexOf(t)!==-1)return;tags[fid].push(t);renderTags(fid);if(fid==='pd-ind')setTimeout(checkIndustrySuggest,100);}
+function rmTag(fid,i){tags[fid].splice(i,1);renderTags(fid);}
+function renderTags(fid){
+  var wrap=document.getElementById(fid+'-wrap'),inp=document.getElementById(fid+'-inp');
+  if(!wrap)return;wrap.querySelectorAll('.tag').forEach(function(t){t.remove();});
+  tags[fid].forEach(function(text,i){var t=document.createElement('div');t.className='tag';t.innerHTML=esc(text)+'<span class="tag-x" onclick="rmTag(\''+fid+'\','+i+')">×</span>';wrap.insertBefore(t,inp);});
+}
+function setTags(fid,arr){tags[fid]=arr?arr.slice():[];renderTags(fid);}
+
+function updateStats(){
+  var q=gv('rep-quota');
+  document.getElementById('stat-methods').textContent=S.rep.methodology.length||'—';
+  document.getElementById('stat-quota').textContent=q?'$'+parseInt(q).toLocaleString():'—';
+  var totalPersonas=S.products.reduce(function(a,p){
+    if(p.companyTypes) return a+p.companyTypes.reduce(function(b,ct){return b+(ct.personas?ct.personas.length:0);},0);
+    return a+(p.personas?p.personas.length:0);
+  },0);
+  document.getElementById('stat-prods').textContent=S.products.length;
+  document.getElementById('stat-personas').textContent=totalPersonas;
+}
+
+function saveRep(){
+  S.rep.name=gv('rep-name');S.rep.company=gv('rep-company');S.rep.quota=gv('rep-quota');
+  S.rep.territory=gv('rep-territory');S.rep.exp=gv('rep-exp');S.rep.notes=gv('rep-notes');
+  S.rep.stakeholders=gv('rep-stakeholders');S.rep.stages=gv('rep-stages');
+  S.rep.linkedin=gv('rep-linkedin');
+  S.rep.industries=tags['rep-ind']?tags['rep-ind'].slice():[];
+  saveApiKey();
+  persist();updateComp();updateStats();toast('Rep profile saved ✓');
+}
+
+// ── Show/hide toggle (works for any field) ──
+function toggleVis(fieldId, btn){
+  var inp=document.getElementById(fieldId);
+  if(inp.type==='password'){inp.type='text';btn.textContent='Hide';}
+  else{inp.type='password';btn.textContent='Show';}
+}
+
+// ── Gemini key (free — AI Coach) ──
+function checkGeminiKey(){
+  var key=document.getElementById('gemini-apikey').value.trim();
+  var el=document.getElementById('gemini-status');
+  if(key.startsWith('AIza')&&key.length>20){
+    el.innerHTML='<div class="api-dot" style="background:var(--green)"></div><span style="color:var(--green)">Key looks good — AI Coach is ready (free)</span>';
+  } else if(key.length>0){
+    el.innerHTML='<div class="api-dot" style="background:var(--brown)"></div><span style="color:var(--brown)">Format looks off — Gemini keys start with AIza</span>';
+  } else {
+    el.innerHTML='<div class="api-dot" style="background:var(--border2)"></div><span style="color:var(--text3)">No key — <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--blue)">get one free at aistudio.google.com →</a></span>';
+  }
+}
+
+function getGeminiKey(){
+  return document.getElementById('gemini-apikey').value.trim()||localStorage.getItem('aisw4_geminikey')||'';
+}
+
+// ── Anthropic key (paid — dossier generation) ──
+function checkApiKey(){
+  var key=document.getElementById('rep-apikey').value.trim();
+  var el=document.getElementById('api-status');
+  if(key.startsWith('sk-ant-')&&key.length>20){
+    el.innerHTML='<div class="api-dot" style="background:var(--green)"></div><span style="color:var(--green)">Key looks good — dossier generation ready</span>';
+  } else if(key.length>0){
+    el.innerHTML='<div class="api-dot" style="background:var(--brown)"></div><span style="color:var(--brown)">Format looks off — should start with sk-ant-</span>';
+  } else {
+    el.innerHTML='<div class="api-dot" style="background:var(--border2)"></div><span style="color:var(--text3)">No key — dossiers won\'t generate without it</span>';
+  }
+}
+
+function getApiKey(){
+  return document.getElementById('rep-apikey').value.trim()||localStorage.getItem('aisw4_apikey')||'';
+}
+
+function saveApiKey(){
+  var ak=document.getElementById('rep-apikey').value.trim();
+  var gk=document.getElementById('gemini-apikey').value.trim();
+  var sk=document.getElementById('serper-apikey').value.trim();
+  var grk=document.getElementById('groq-apikey').value.trim();
+  var oai=document.getElementById('openai-apikey').value.trim();
+  // Cache locally
+  if(ak)  localStorage.setItem('aisw4_apikey',ak);
+  if(gk)  localStorage.setItem('aisw4_geminikey',gk);
+  if(sk)  localStorage.setItem('aisw4_serperkey',sk);
+  if(grk) localStorage.setItem('aisw4_groqkey',grk);
+  if(oai) localStorage.setItem('aisw4_openaikey',oai);
+  // Save to server
+  if(window.AISW){
+    AISW.saveKeys({gemini:gk, anthropic:ak, groq:grk, serper:sk, openai:oai});
+  }
+}
+
+function loadApiKey(){
+  var ak=localStorage.getItem('aisw4_apikey')||'';
+  var gk=localStorage.getItem('aisw4_geminikey')||'';
+  var sk=localStorage.getItem('aisw4_serperkey')||'';
+  var grk=localStorage.getItem('aisw4_groqkey')||'';
+  var oai=localStorage.getItem('aisw4_openaikey')||'';
+  if(ak){document.getElementById('rep-apikey').value=ak;checkApiKey();}
+  if(gk){document.getElementById('gemini-apikey').value=gk;checkGeminiKey();}
+  if(sk){document.getElementById('serper-apikey').value=sk;checkSerperKey();}
+  if(grk){document.getElementById('groq-apikey').value=grk;checkGroqKey();}
+  if(oai){document.getElementById('openai-apikey').value=oai;checkOpenAIKey();}
+}
+
+function openNewProdModal(){sv('np-name','');sv('np-desc','');openModal('modal-new-prod');}
+function createProd(){
+  var name=gv('np-name');if(!name){document.getElementById('np-name').focus();return;}
+  var p={id:'p'+Date.now(),name:name,desc:gv('np-desc'),color:PROD_COLORS[S.products.length%PROD_COLORS.length],
+    category:'',what:'',deal:'',cycle:'',coSize:'',industries:[],pains:[],triggers:[],roi:[],wins:[],objections:[],competitors:[],personas:[]};
+  S.products.push(p);closeModal('modal-new-prod');renderSidebar();renderOverview();updateBadge();persist();openProd(p.id);
+}
+
+function openProd(id){
+  var p=getProd(id);if(!p)return;
+  S.activeProd=id;painCount=0;winCount=0;objCount=0;compCount=0;
+
+  // Defensive defaults for fields that may be missing on auto-filled products
+  p.industries = p.industries||[];
+  p.triggers   = p.triggers||[];
+  p.roi        = p.roi||[];
+  p.pains      = p.pains||[];
+  p.wins       = p.wins||[];
+  p.objections = p.objections||[];
+  p.competitors= p.competitors||[];
+  p.companyTypes=p.companyTypes||[];
+
+  sv('pd-name',    p.name);
+  sv('pd-cat',     p.category);
+  sv('pd-type',    p.type||'');
+  sv('pd-what',    p.what||p.desc||'');
+  sv('pd-deal',    p.deal);
+  sv('pd-cycle',   p.cycle);
+  sv('pd-cosize',  p.coSize);
+  sv('pd-impl-fee',p.implFee||'');
+  sv('pd-integrations', p.integrations||'');
+
+  ['pd-ind','pd-trig','pd-roi'].forEach(function(f){initTag(f);});
+  setTags('pd-ind',  p.industries);
+  setTags('pd-trig', p.triggers);
+  setTags('pd-roi',  p.roi);
+
+  document.getElementById('pain-list').innerHTML='';
+  document.getElementById('win-list').innerHTML='';
+  document.getElementById('obj-list').innerHTML='';
+  document.getElementById('comp-list').innerHTML='';
+
+  p.pains.forEach(function(x){addPain(x);});
+  p.wins.forEach(function(x){addWin(x);});
+  p.objections.forEach(function(x){addObj(x);});
+  p.competitors.forEach(function(x){addComp(x);});
+
+  document.getElementById('pd-eye').textContent   = p.category||'Product';
+  document.getElementById('pd-title').textContent = p.name||'Unnamed';
+  document.getElementById('pd-sub').textContent   = p.what||p.desc||'Add details below';
+  document.getElementById('pd-del').onclick = function(){deleteProd(id);};
+
+  renderCoTypeList(p);
+  showPanel('prod');
+  updateSidebarActive(id);
+  setChatCtx('product',p.name);
+}
+
+function updateProdHdr(){document.getElementById('pd-title').textContent=gv('pd-name')||'Unnamed';}
+
+function saveProd(){
+  var p=getProd(S.activeProd);if(!p)return;
+  p.name=gv('pd-name');p.category=gv('pd-cat');p.what=gv('pd-what');
+  p.deal=gv('pd-deal');p.cycle=gv('pd-cycle');p.coSize=gv('pd-cosize');
+  p.implFee=gv('pd-impl-fee');p.integrations=gv('pd-integrations');
+  // Get selected product type radio
+  var typeEl=document.querySelector('input[name="pd-type"]:checked');
+  p.type=typeEl?typeEl.value:'';
+  p.industries=(tags['pd-ind']||[]).slice();
+  p.triggers=(tags['pd-trig']||[]).slice();
+  p.roi=(tags['pd-roi']||[]).slice();
+  p.pains=collectPains();p.wins=collectWins();p.objections=collectObjList();p.competitors=collectComps();
+  renderSidebar();updateBadge();persist();updateComp();updateStats();toast('Product saved \u2713');
+}
+
+function deleteProd(id){
+  var p=getProd(id);if(!p)return;
+  if(!confirm('Delete "'+p.name+'" and all its data? This cannot be undone.'))return;
+  S.products=S.products.filter(function(x){return x.id!==id;});
+  S.activeProd=null;renderSidebar();updateBadge();persist();updateComp();updateStats();showPanel('products');toast('"'+p.name+'" deleted');
+}
+
+function getProd(id){return S.products.find(function(p){return p.id===id;})||null;}
+
+function addPain(data){
+  painCount++;var id='pain-'+painCount;
+  var d=document.createElement('div');d.className='pain-card';d.id=id;
+  d.innerHTML='<div class="pain-hdr"><span class="pain-num pain-num-yellow">Pain '+painCount+'</span><div class="ico-btn del" onclick="document.getElementById(\''+id+'\').remove()">✕</div></div>'+
+    '<div class="g2" style="margin-bottom:8px">'+
+    '<div><div class="field-lbl">The pain</div><textarea rows="2" placeholder="e.g. AP team manually keying 800 invoices/month, missing early-pay discounts">'+(data&&data.pain||'')+'</textarea></div>'+
+    '<div><div class="field-lbl">Your solution</div><textarea rows="2" placeholder="e.g. Intelligent OCR + 3-way match eliminates manual entry and catches duplicates">'+(data&&data.solution||'')+'</textarea></div></div>'+
+    '<div><div class="field-lbl">Proof / outcome</div><input type="text" value="'+(data&&data.proof||'')+'" placeholder="e.g. Avg customer reduces processing time 65% in 90 days" /></div>';
+  document.getElementById('pain-list').appendChild(d);
+}
+
+function collectPains(){
+  var res=[];document.querySelectorAll('#pain-list .pain-card').forEach(function(c){
+    var tas=c.querySelectorAll('textarea'),inp=c.querySelector('input');
+    var o={pain:tas[0]?tas[0].value.trim():'',solution:tas[1]?tas[1].value.trim():'',proof:inp?inp.value.trim():''};
+    if(o.pain)res.push(o);});return res;
+}
+
+function addWin(data){
+  winCount++;var id='win-'+winCount;var d=document.createElement('div');d.className='pain-card';d.id=id;
+  d.innerHTML='<div class="pain-hdr"><span class="pain-num pain-num-green">Win '+winCount+'</span><div class="ico-btn del" onclick="document.getElementById(\''+id+'\').remove()">✕</div></div>'+
+    '<div class="g2" style="margin-bottom:8px"><div><div class="field-lbl">Company type</div><input type="text" value="'+(data&&data.company||'')+'" placeholder="400-person manufacturer, Ohio" /></div>'+
+    '<div><div class="field-lbl">Deal size</div><div class="dollar-wrap"><input type="number" value="'+(data&&data.deal||'')+'" placeholder="62000" /></div></div></div>'+
+    '<div><div class="field-lbl">Situation and outcome (with numbers)</div><textarea rows="3" placeholder="e.g. Controller processing 800 invoices/month manually. After 90-day POC, cut processing time 60%. CFO approved 3-year deal.">'+(data&&data.story||'')+'</textarea></div>';
+  document.getElementById('win-list').appendChild(d);
+}
+
+function collectWins(){
+  var res=[];document.querySelectorAll('#win-list .pain-card').forEach(function(c){
+    var inps=c.querySelectorAll('input'),ta=c.querySelector('textarea');
+    var o={company:inps[0]?inps[0].value.trim():'',deal:inps[1]?inps[1].value.trim():'',story:ta?ta.value.trim():''};
+    if(o.company||o.story)res.push(o);});return res;
+}
+
+function addObj(data){
+  objCount++;var id='obj-'+objCount;var d=document.createElement('div');d.className='pain-card';d.id=id;
+  d.innerHTML='<div class="pain-hdr"><span class="pain-num pain-num-red">Objection '+objCount+'</span><div class="ico-btn del" onclick="document.getElementById(\''+id+'\').remove()">✕</div></div>'+
+    '<div class="g2"><div><div class="field-lbl">The objection</div><input type="text" value="'+(data&&data.objection||'')+'" placeholder="We\'re too busy right now" /></div>'+
+    '<div><div class="field-lbl">Your response</div><input type="text" value="'+(data&&data.response||'')+'" placeholder="That\'s exactly why clients come to us..." /></div></div>';
+  document.getElementById('obj-list').appendChild(d);
+}
+
+function collectObjList(){
+  var res=[];document.querySelectorAll('#obj-list .pain-card').forEach(function(c){
+    var inps=c.querySelectorAll('input');var o={objection:inps[0]?inps[0].value.trim():'',response:inps[1]?inps[1].value.trim():''};
+    if(o.objection)res.push(o);});return res;
+}
+
+function addComp(data){
+  compCount++;var id='comp-'+compCount;var d=document.createElement('div');d.className='pain-card';d.id=id;
+  d.innerHTML='<div class="pain-hdr"><span class="pain-num pain-num-blue">Competitor '+compCount+'</span><div class="ico-btn del" onclick="document.getElementById(\''+id+'\').remove()">✕</div></div>'+
+    '<div class="g3"><div><div class="field-lbl">Name</div><input type="text" value="'+(data&&data.name||'')+'" placeholder="Tipalti, Bill.com..." /></div>'+
+    '<div><div class="field-lbl">How we beat them</div><input type="text" value="'+(data&&data.howWeBeat||'')+'" placeholder="Deeper ERP integration" /></div>'+
+    '<div><div class="field-lbl">When they win</div><input type="text" value="'+(data&&data.whenTheyWin||'')+'" placeholder="Pure SMB under $20K" /></div></div>';
+  document.getElementById('comp-list').appendChild(d);
+}
+
+function collectComps(){
+  var res=[];document.querySelectorAll('#comp-list .pain-card').forEach(function(c){
+    var inps=c.querySelectorAll('input');var o={name:inps[0]?inps[0].value.trim():'',howWeBeat:inps[1]?inps[1].value.trim():'',whenTheyWin:inps[2]?inps[2].value.trim():''};
+    if(o.name)res.push(o);});return res;
+}
+
+// ── active context for persona editing (which cotype) ──
+var activeCoTypeIdx = null;
+
+function openPersonaModal(personaIdx, coTypeIdx){
+  editPersonaIdx = personaIdx;
+  activeCoTypeIdx = coTypeIdx;
+  var p = getProd(S.activeProd);
+  sv('pm-titles','');sv('pm-role','');sv('pm-auth','0');sv('pm-cares','');sv('pm-style','');sv('pm-obj','');sv('pm-rf','');
+  authLevel=0;selRole(null);updateAuthPips();tags['pm-lang']=[];initTag('pm-lang');renderTags('pm-lang');
+  // Set context subtitle
+  var ct = p&&p.companyTypes?p.companyTypes[coTypeIdx]:null;
+  document.getElementById('pm-modal-title').textContent = personaIdx!==null?'Edit Persona':'Add a Persona';
+  document.getElementById('pm-modal-sub').textContent = ct?'For company type: '+ct.name:'Who buys this product?';
+  if(personaIdx!==null&&ct&&ct.personas&&ct.personas[personaIdx]){
+    var per=ct.personas[personaIdx];
+    sv('pm-titles',per.titles);sv('pm-cares',per.cares);sv('pm-style',per.style);sv('pm-obj',per.obj);sv('pm-rf',per.rf);
+    selRole(per.role);authLevel=per.authority||0;updateAuthPips();
+    tags['pm-lang']=per.language?per.language.slice():[];renderTags('pm-lang');
+  }
+  openModal('modal-persona');
+}
+
+function selRole(r){
+  document.getElementById('pm-role').value=r||'';
+  document.querySelectorAll('.role-opt').forEach(function(el){el.className='role-opt'+(r&&el.dataset.r===r?' sel-'+r:'');});
+}
+
+function chgAuth(d){authLevel=Math.max(0,Math.min(5,authLevel+d));document.getElementById('pm-auth').value=authLevel;updateAuthPips();}
+function updateAuthPips(){
+  document.querySelectorAll('.auth-pip').forEach(function(p){p.classList.toggle('on',parseInt(p.dataset.p)<=authLevel);});
+  var lbls=['Not set','Very low','Low','Moderate','High','Signs the check'];
+  document.getElementById('pm-auth-lbl').textContent=lbls[authLevel]||'';
+}
+
+function savePersona(){
+  var p=getProd(S.activeProd);if(!p)return;
+  var titles=gv('pm-titles');if(!titles){document.getElementById('pm-titles').focus();return;}
+  var per={titles:titles,role:gv('pm-role'),authority:authLevel,cares:gv('pm-cares'),style:gv('pm-style'),language:(tags['pm-lang']||[]).slice(),obj:gv('pm-obj'),rf:gv('pm-rf')};
+  if(!p.companyTypes) p.companyTypes=[];
+  var ct=p.companyTypes[activeCoTypeIdx];if(!ct)return;
+  if(!ct.personas) ct.personas=[];
+  if(editPersonaIdx!==null&&ct.personas[editPersonaIdx]) ct.personas[editPersonaIdx]=per;
+  else ct.personas.push(per);
+  closeModal('modal-persona');renderCoTypeList(p);renderSidebar();persist();updateStats();refreshPainPersonaSections();toast('Persona saved ✓');
+}
+
+function renderPersonaGrid(p){
+  var grid=document.getElementById('persona-grid');grid.innerHTML='';
+  (p.personas||[]).forEach(function(per,i){
+    var rc={buyer:'rb-buyer',champion:'rb-champion',blocker:'rb-blocker',influencer:'rb-influencer'}[per.role]||'rb-champion';
+    var rl={buyer:'Economic Buyer',champion:'Champion',blocker:'Blocker',influencer:'Influencer'}[per.role]||'Persona';
+    var pips='';for(var n=1;n<=5;n++)pips+='<div class="auth-pip'+(n<=(per.authority||0)?' on':'')+'"></div>';
+    var card=document.createElement('div');card.className='persona-card';card.onclick=function(){openPersonaModal(i);};
+    card.innerHTML='<div class="role-bdg '+rc+'">'+rl+'</div><div class="persona-ttl">'+esc(per.titles||'Untitled')+'</div>'+
+      '<div class="persona-snip">'+esc(per.cares||'No details yet.')+'</div>'+
+      '<div class="persona-foot"><div class="auth-pips">'+pips+'</div><div class="ico-btn del" onclick="event.stopPropagation();delPersona('+i+')">✕</div></div>';
+    grid.appendChild(card);
+  });
+  var add=document.createElement('div');add.className='add-persona';add.onclick=function(){openPersonaModal(null);};
+  add.innerHTML='<div style="font-size:20px;font-weight:700">+</div><div style="font-size:12px;font-weight:700">Add persona</div><div style="font-size:11px">Who buys this?</div>';
+  grid.appendChild(add);
+}
+
+function delPersona(i){
+  var p=getProd(S.activeProd);if(!p)return;p.personas.splice(i,1);renderPersonaGrid(p);renderSidebar();persist();updateStats();refreshPainPersonaSections();toast('Persona removed');
+}
+
+function renderSidebar(){
+  var list=document.getElementById('prod-nav-list');list.innerHTML='';
+  S.products.forEach(function(p){
+    var d=document.createElement('div');d.className='pnav'+(S.activeProd===p.id?' active':'');d.id='pnav-'+p.id;d.onclick=function(){openProd(p.id);};
+    d.innerHTML='<div class="pnav-name"><div class="color-dot" style="background:'+p.color+'"></div>'+esc(p.name||'Unnamed')+'</div>'+
+      '<div class="pnav-sub">'+(p.personas?p.personas.length:0)+' persona'+(p.personas&&p.personas.length!==1?'s':'')+'</div>';
+    list.appendChild(d);
+  });
+}
+
+function updateSidebarActive(id){document.querySelectorAll('.pnav').forEach(function(n){n.classList.toggle('active',n.id==='pnav-'+id);});}
+
+function renderOverview(){
+  var grid=document.getElementById('prod-overview-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+
+  S.products.forEach(function(p){
+    var d=document.createElement('div');
+    d.className='prod-card';
+
+    // Count personas across all company types
+    var personaCount=0;
+    if(p.companyTypes) p.companyTypes.forEach(function(ct){personaCount+=(ct.personas?ct.personas.length:0);});
+    else if(p.personas) personaCount=p.personas.length;
+    var ctCount=p.companyTypes?p.companyTypes.length:0;
+
+    d.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:7px;margin-bottom:8px">'+
+        '<div class="color-dot" style="background:'+p.color+';margin-top:3px;flex-shrink:0"></div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:700;color:var(--text)">'+esc(p.name||'Unnamed')+'</div>'+
+          (p.category?'<div style="font-size:10px;color:var(--text3);margin-top:1px">'+esc(p.category)+'</div>':'')+
+        '</div>'+
+        '<button class="ico-btn del" data-delid="'+p.id+'" title="Delete product" style="flex-shrink:0">&#x2715;</button>'+
+      '</div>'+
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.5">'+esc(p.what||p.desc||'No description yet — click to edit')+'</div>'+
+      '<div class="prod-stat"><span>&#x26A1;</span>'+(p.pains?p.pains.length:0)+' pain pairs</div>'+
+      '<div class="prod-stat"><span>&#x1F3E2;</span>'+ctCount+' company type'+(ctCount!==1?'s':'')+'</div>'+
+      '<div class="prod-stat"><span>&#x1F464;</span>'+personaCount+' persona'+(personaCount!==1?'s':'')+'</div>'+
+      '<div class="prod-stat"><span>&#x1F3C6;</span>'+(p.wins?p.wins.length:0)+' win stories</div>'+
+      '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;font-weight:600;color:var(--blue);text-align:right">Open &amp; Edit &#x2192;</div>';
+
+    // Wire events after innerHTML is set
+    var delBtn=d.querySelector('[data-delid]');
+    if(delBtn){
+      delBtn.addEventListener('click',function(e){
+        e.stopPropagation();
+        deleteProd(p.id);
+      });
+    }
+    d.addEventListener('click',function(){openProd(p.id);});
+    grid.appendChild(d);
+  });
+
+  // Add product card
+  var add=document.createElement('div');
+  add.className='prod-card add-new';
+  add.onclick=openNewProdModal;
+  add.innerHTML='<div style="font-size:22px;color:var(--green)">+</div><div style="font-size:13px;font-weight:700">Add product</div><div style="font-size:11px">Define what you sell</div>';
+  grid.appendChild(add);
+}
+
+function updateBadge(){document.getElementById('prod-badge').textContent=S.products.length;}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  var map={rep:'panel-rep',products:'panel-products',prod:'panel-prod'};
+  var el=document.getElementById(map[name]);if(el)el.classList.add('active');
+  if(name==='rep'){document.getElementById('nav-rep').classList.add('active');setChatCtx('rep');}
+  else if(name==='products'){document.getElementById('nav-prods').classList.add('active');setChatCtx('products');renderOverview();}
+  else if(name==='prod'){document.getElementById('nav-prods').classList.add('active');}
+}
+
+function updateComp(){
+  var score=0,max=12;
+  if(S.rep.name)score++;if(S.rep.methodology.length)score+=2;if(S.rep.tone)score++;
+  if(Object.keys(S.rep.process).some(function(k){return S.rep.process[k];}))score++;
+  if(S.products.length>0){score+=2;var p=S.products[0];
+    if(p.pains&&p.pains.length)score+=2;if(p.personas&&p.personas.length)score+=2;if(p.wins&&p.wins.length)score++;if(p.triggers&&p.triggers.length)score++;}
+  var pct=Math.min(100,Math.round((score/max)*100));
+  document.getElementById('comp-fill').style.width=pct+'%';document.getElementById('comp-pct').textContent=pct+'%';
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('.modal-bd').forEach(function(bd){bd.addEventListener('click',function(e){if(e.target===bd)closeModal(bd.id);});});
+
+function persist(){
+  // Save to localStorage as offline cache
+  try{ localStorage.setItem('aisw4',JSON.stringify(S)); }catch(e){}
+  // Save to server if authenticated
+  if(window.AISW){
+    var data = {rep: S.rep, products: S.products};
+    AISW.savePlaybook(data);
+  }
+}
+function loadState(){try{var s=localStorage.getItem('aisw4');if(s){var p=JSON.parse(s);if(p.rep)S.rep=p.rep;if(p.products)S.products=p.products;}}catch(e){}}
+function restoreRepForm(){
+  sv('rep-name',S.rep.name);sv('rep-company',S.rep.company);sv('rep-quota',S.rep.quota);sv('rep-territory',S.rep.territory);sv('rep-exp',S.rep.exp);sv('rep-notes',S.rep.notes);sv('rep-stakeholders',S.rep.stakeholders);sv('rep-stages',S.rep.stages);
+  tags['rep-ind']=S.rep.industries?S.rep.industries.slice():[];renderTags('rep-ind');renderMethods();renderTones();restoreProc();updateStats();
+}
+
+var toastT;
+function toast(msg){var e=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;e.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){e.classList.remove('show');},2200);}
+function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function sv(id,v){var e=document.getElementById(id);if(e)e.value=v||'';}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// CHAT
+var chatCtx='rep',chatActiveProd='',chatHistory=[],chatBusy=false;
+// Build a structured summary of all products + company types + personas for the prompt
+function buildPlaybookSummary(){
+  if(!S.products||!S.products.length) return 'No products defined yet.';
+  return S.products.map(function(p){
+    var ctSummary='';
+    if(p.companyTypes&&p.companyTypes.length){
+      ctSummary='\n  Company Types:\n'+p.companyTypes.map(function(ct){
+        var perSummary='';
+        if(ct.personas&&ct.personas.length){
+          perSummary=ct.personas.map(function(per){
+            return '      - '+per.titles+' ('+per.role+', authority: '+per.authority+'/5): '+per.cares;
+          }).join('\n');
+        } else { perSummary='      (no personas yet)'; }
+        return '    '+ct.name+(ct.size?' ['+ct.size+']':'')+'\n'+perSummary;
+      }).join('\n');
+    } else { ctSummary='\n  (no company types defined yet)'; }
+    return '* '+p.name+(p.category?' ['+p.category+']':'')+
+      '\n  What it does: '+(p.what||p.desc||'not defined')+
+      '\n  Deal: '+(p.deal||'?')+' | Cycle: '+(p.cycle||'?')+
+      ctSummary;
+  }).join('\n\n');
+}
+
+var CHAT_SYSTEMS={
+  rep:function(){
+    var prodSummary=buildPlaybookSummary();
+    return [
+      'You are a sharp B2B sales coach helping a rep build a comprehensive sales playbook.',
+      '',
+      'REP DATA:',
+      'Name: '+(S.rep.name||'unknown')+', Company: '+(S.rep.company||'unknown'),
+      'Methodology: '+(S.rep.methodology||[]).join(', ')||'not set',
+      'Tone: '+(S.rep.tone||'not set'),
+      'Process flags: '+JSON.stringify(S.rep.process),
+      'Notes: '+(S.rep.notes||'none'),
+      '',
+      'CURRENT PLAYBOOK SUMMARY:',
+      prodSummary,
+      '',
+      'RULES:',
+      '- Ask ONE focused question at a time',
+      '- Be specific and conversational — you already know their context above',
+      '- Probe how they apply their methodology day-to-day',
+      '- If products are defined, reference them by name',
+      '- If company types or personas are missing, nudge them to add those',
+      '- After a good answer, end with [SAVE: field: value] for any clean data point',
+      '- Keep responses under 4 sentences'
+    ].join('\n');
+  },
+  products:function(){
+    var prodSummary=buildPlaybookSummary();
+    return [
+      'You are a sales coach helping a rep think through their product portfolio.',
+      '',
+      'CURRENT PRODUCTS AND COMPANY TYPES:',
+      prodSummary,
+      '',
+      'Rep methodology: '+(S.rep.methodology||[]).join(', ')||'not set',
+      '',
+      'Ask ONE insightful question about their portfolio — pain patterns across products, which product leads a conversation, or which company type they find hardest to crack.',
+      'Under 3 sentences. Reference specific products and company types by name when relevant.'
+    ].join('\n');
+  },
+  product:function(){
+    var p=getProd(S.activeProd);
+    var prodSummary=p?[
+      'Product: '+p.name+' ['+p.category+']',
+      'Description: '+(p.what||p.desc||'none'),
+      'Deal: '+(p.deal||'?')+' | Cycle: '+(p.cycle||'?'),
+      'Pains defined: '+(p.pains?p.pains.length:0),
+      'Company types: '+(p.companyTypes?p.companyTypes.map(function(ct){
+        return ct.name+' ('+(ct.personas?ct.personas.length:0)+' personas: '+(ct.personas&&ct.personas.length?ct.personas.map(function(per){return per.titles+' ['+per.role+']';}).join(', '):'none')+')';
+      }).join('; '):'none defined')
+    ].join('\n'):'No product loaded.';
+    return [
+      'You are a sales coach helping document the "'+chatActiveProd+'" product in detail.',
+      '',
+      prodSummary,
+      '',
+      'Rep methodology: '+(S.rep.methodology||[]).join(', ')||'not set',
+      '',
+      'Your job: ask ONE probing question that helps the rep articulate something specific about this product.',
+      '- If no company types exist, ask them to describe the types of companies that buy this product',
+      '- If company types exist but personas are missing, ask about the specific buyers at those companies and their role (buyer, champion, influencer, blocker)',
+      '- If personas exist, probe pain intensity — which personas feel the pain most acutely and what language resonates',
+      '- Always tie questions to their methodology (e.g. if Sandler: ask about the pain budget at each company type)',
+      'Under 3 sentences. Be specific, not generic.'
+    ].join('\n');
+  }
+};
+
+var CHAT_SUGGS={
+  rep:['Tell me about your biggest win','How do you run your first call?','What kills deals for you?','How do you get to the economic buyer?'],
+  products:['Which product is hardest to sell?','Which company type closes fastest?','Where do deals most often stall?'],
+  product:['What types of companies buy this?','Who is the economic buyer at each company type?','What pain hits hardest for each persona?','What does your best win look like?']
+};
+
+function setChatCtx(ctx,prodName){
+  chatCtx=ctx;chatActiveProd=prodName||'';
+  var lbl={rep:'Coaching you on your Rep Profile',products:'Exploring your product portfolio',product:'Digging into: '+chatActiveProd}[ctx]||'';
+  document.getElementById('chat-ctx-lbl').textContent=lbl;
+  renderSuggs(ctx);
+  // Only show welcome message once — never repeat it on context switches
+  if(!chatStarted){chatStarted=true;startChat();}
+  // Quietly update context label — no message spam on every panel switch
+}
+
+var chatStarted=false;
+
+function renderSuggs(ctx){
+  var suggs=CHAT_SUGGS[ctx]||CHAT_SUGGS.rep,el=document.getElementById('chat-sugg');el.innerHTML='';
+  suggs.forEach(function(s){var d=document.createElement('div');d.className='sugg';d.textContent=s;d.onclick=function(){sendChatMsg(s);};el.appendChild(d);});
+}
+
+function startChat(){
+  chatHistory=[];
+  var gk=getGeminiKey();
+  var ak=getApiKey();
+  if(!gk&&!ak){ showKeyOnboarding(); return; }
+
+  var hasProducts=S.products&&S.products.length>0;
+  var hasCompanyTypes=hasProducts&&S.products.some(function(p){return p.companyTypes&&p.companyTypes.length>0;});
+  var hasPersonas=hasCompanyTypes&&S.products.some(function(p){return p.companyTypes&&p.companyTypes.some(function(ct){return ct.personas&&ct.personas.length>0;});});
+
+  var msg='';
+  if(!S.rep.name){
+    msg="Hi! I\u2019m your AI Sales Coach.\n\nLet\u2019s build your playbook. First \u2014 what\u2019s your name, and what company do you sell for?";
+  } else if(!hasProducts){
+    msg='Hi '+S.rep.name+'! Your rep profile looks good.\n\nNow let\u2019s build out your products. What do you sell? Give me the product name and who typically buys it \u2014 I\u2019ll help you document the details.';
+  } else if(!hasCompanyTypes){
+    msg='Good work on the products, '+S.rep.name+'.\n\nNext step: define the types of companies that buy each product. For example, for '+S.products[0].name+' \u2014 is it enterprise firms, mid-market, specific verticals? What does your best-fit account look like?';
+  } else if(!hasPersonas){
+    msg='Products and company types are looking solid.\n\nNow let\u2019s add personas inside each company type. For '+S.products[0].name+' at a '+S.products[0].companyTypes[0].name+' \u2014 who is the economic buyer? Who champions the deal internally? Who blocks it?';
+  } else {
+    msg='Your playbook is taking shape, '+S.rep.name+'!\n\nHere\u2019s a summary of what you have:\n'+buildPlaybookSummary().substring(0,400)+'...\n\nWhat would you like to refine? Pain points, objections, or win stories are great next steps.';
+  }
+  addChatMsg('ai',msg);
+}
+
+var countdownTimer=null;
+
+function showKeyOnboarding(){
+  var msgs=document.getElementById('chat-msgs');
+  var div=document.createElement('div');
+  div.id='key-onboarding';
+  div.style.cssText='padding:4px 0;animation:mfade .2s ease';
+  div.innerHTML=
+    '<div style="background:white;border:1px solid var(--border);border-radius:10px;border-bottom-left-radius:2px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.06);max-width:96%">'+
+      '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">\ud83d\udc4b Welcome to AI-SalesWizard</div>'+
+      '<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">'+
+        'The AI Coach needs a free API key from Google to get started. It takes about 60 seconds \u2014 no credit card required.'+
+      '</div>'+
+      '<div style="background:var(--green-bg);border:1px solid var(--green-b);border-radius:6px;padding:10px 12px;margin-bottom:10px">'+
+        '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--green);margin-bottom:6px">\u26a1 Option 1 \u2014 Free (Recommended)</div>'+
+        '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">Gemini API key from Google AI Studio. Free tier, no credit card.</div>'+
+        '<button onclick="startGeminiFlow()" style="background:var(--green);color:white;border:none;border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;width:100%">'+
+          'Open Google AI Studio \u2192 Get Free Key'+
+        '</button>'+
+      '</div>'+
+      '<div style="background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:6px;padding:10px 12px">'+
+        '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);margin-bottom:6px">\ud83d\udd11 Option 2 \u2014 Anthropic Key</div>'+
+        '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">Already have an Anthropic key? Use that for the coach too.</div>'+
+        '<button onclick="startAnthropicFlow()" style="background:var(--blue);color:white;border:none;border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;width:100%">'+
+          'I Have an Anthropic Key'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function startGeminiFlow(){
+  var card=document.getElementById('key-onboarding');if(card)card.remove();
+  window.open('https://aistudio.google.com/app/apikey','_blank');
+  var msgs=document.getElementById('chat-msgs');
+  var div=document.createElement('div');div.className='cmsg ai';div.id='countdown-card';
+  div.innerHTML='<div class="bubble" id="countdown-bubble">'+
+    '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Google AI Studio just opened in a new tab \ud83d\ude80</div>'+
+    '<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px">'+
+      '1. Sign in with Google<br>'+
+      '2. Click <strong>"Create API key"</strong><br>'+
+      '3. Copy the key (starts with <code style="background:#f0f0f0;padding:1px 4px;border-radius:3px">AIza</code>)<br>'+
+      '4. Paste it below'+
+    '</div>'+
+    '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">'+
+      '<div style="font-size:11px;color:var(--text3)">Waiting for your key...</div>'+
+      '<div style="margin-left:auto;font-size:13px;font-weight:700;color:var(--green);background:var(--green-bg);padding:3px 10px;border-radius:10px;border:1px solid var(--green-b)" id="countdown-num">\u23f1 60s</div>'+
+    '</div>'+
+    '<input type="text" id="quick-gemini-inp" placeholder="Paste your AIza... key here" style="width:100%;margin-bottom:8px;font-family:monospace;font-size:12px;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;outline:none" oninput="checkQuickKey(this)" />'+
+    '<button id="quick-gemini-btn" onclick="submitQuickKey()" style="background:var(--border);color:var(--text3);border:1px solid var(--border2);border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:not-allowed;font-family:Arial,sans-serif;width:100%;transition:all .15s" disabled>'+
+      'Paste your key above to continue'+
+    '</button>'+
+  '</div><div class="mtime">now</div>';
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+  var secs=60;
+  countdownTimer=setInterval(function(){
+    secs--;
+    var el=document.getElementById('countdown-num');
+    if(el) el.textContent='\u23f1 '+secs+'s';
+    if(secs<=0){clearInterval(countdownTimer);if(el){el.textContent='\u2713 Take your time';el.style.color='var(--text3)';}}
+  },1000);
+}
+
+function checkQuickKey(inp){
+  var btn=document.getElementById('quick-gemini-btn');
+  var val=inp.value.trim();
+  if(val.startsWith('AIza')&&val.length>20){
+    btn.style.cssText='background:var(--green);color:white;border:1px solid var(--green);border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;width:100%';
+    btn.textContent='Activate AI Coach \u2192';btn.disabled=false;
+  } else {
+    btn.style.cssText='background:var(--border);color:var(--text3);border:1px solid var(--border2);border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:not-allowed;font-family:Arial,sans-serif;width:100%';
+    btn.textContent='Paste your key above to continue';btn.disabled=true;
+  }
+}
+
+function submitQuickKey(){
+  var val=document.getElementById('quick-gemini-inp').value.trim();
+  if(!val.startsWith('AIza')||val.length<20) return;
+  document.getElementById('gemini-apikey').value=val;
+  localStorage.setItem('aisw4_geminikey',val);
+  checkGeminiKey();
+  clearInterval(countdownTimer);
+  var card=document.getElementById('countdown-card');if(card)card.remove();
+  addChatMsg('ai',"You're all set! \ud83c\udf89 Gemini AI Coach is now active \u2014 completely free.\n\nLet's build your playbook. What do you sell, and who's your dream prospect?");
+}
+
+function startAnthropicFlow(){
+  var card=document.getElementById('key-onboarding');if(card)card.remove();
+  var msgs=document.getElementById('chat-msgs');
+  var div=document.createElement('div');div.className='cmsg ai';div.id='anthro-card';
+  div.innerHTML='<div class="bubble">'+
+    '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">Paste your Anthropic key</div>'+
+    '<div style="font-size:12px;color:var(--text2);margin-bottom:10px">Find it at <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--blue);font-weight:700">console.anthropic.com/keys \u2192</a></div>'+
+    '<input type="password" id="quick-anthro-inp" placeholder="sk-ant-..." style="width:100%;margin-bottom:8px;font-family:monospace;font-size:12px;background:white;border:1px solid var(--border);border-radius:6px;padding:8px 10px;outline:none" oninput="checkQuickAnthroKey(this)" />'+
+    '<button id="quick-anthro-btn" onclick="submitAnthroKey()" style="background:var(--border);color:var(--text3);border:1px solid var(--border2);border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:not-allowed;font-family:Arial,sans-serif;width:100%" disabled>'+
+      'Paste your key above'+
+    '</button>'+
+  '</div><div class="mtime">now</div>';
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function checkQuickAnthroKey(inp){
+  var btn=document.getElementById('quick-anthro-btn');
+  var val=inp.value.trim();
+  if(val.startsWith('sk-ant-')&&val.length>20){
+    btn.style.cssText='background:var(--blue);color:white;border:1px solid var(--blue);border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif;width:100%';
+    btn.textContent='Activate AI Coach \u2192';btn.disabled=false;
+  } else {
+    btn.style.cssText='background:var(--border);color:var(--text3);border:1px solid var(--border2);border-radius:5px;padding:7px 14px;font-size:12px;font-weight:700;cursor:not-allowed;font-family:Arial,sans-serif;width:100%';
+    btn.textContent='Paste your key above';btn.disabled=true;
+  }
+}
+
+function submitAnthroKey(){
+  var val=document.getElementById('quick-anthro-inp').value.trim();
+  if(!val.startsWith('sk-ant-')||val.length<20) return;
+  document.getElementById('rep-apikey').value=val;
+  localStorage.setItem('aisw4_apikey',val);
+  checkApiKey();
+  var card=document.getElementById('anthro-card');if(card)card.remove();
+  addChatMsg('ai',"Got it \u2014 AI Coach is ready! \ud83c\udf89\n\nLet's build your playbook. What do you sell, and who's your dream prospect?");
+}
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
+function sendChat(){var inp=document.getElementById('chat-inp');var msg=inp.value.trim();if(!msg||chatBusy)return;inp.value='';inp.style.height='auto';sendChatMsg(msg);}
+function sendChatMsg(msg){addChatMsg('user',msg);chatHistory.push({role:'user',content:msg});chatBusy=true;document.getElementById('chat-send').disabled=true;showTyping();callClaude();}
+
+function addChatMsg(role,text){
+  var msgs=document.getElementById('chat-msgs');var div=document.createElement('div');div.className='cmsg '+role;
+  var now=new Date();var t=now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+  div.innerHTML='<div class="bubble">'+esc(text).replace(/\n/g,'<br>')+'</div><div class="mtime">'+t+'</div>';
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function showTyping(){
+  var msgs=document.getElementById('chat-msgs');var d=document.createElement('div');d.className='cmsg ai';d.id='typing-ind';
+  d.innerHTML='<div class="typing-b"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>';
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function hideTyping(){var t=document.getElementById('typing-ind');if(t)t.remove();}
+
+// ── AI COACH — full waterfall ──
+async function callClaude(){
+  var hasAnyKey=getGeminiKey()||getGroqKey()||getOpenAIKey()||getApiKey();
+  if(!hasAnyKey){
+    hideTyping();
+    if(!document.getElementById('key-onboarding')&&!document.getElementById('countdown-card')&&!document.getElementById('anthro-card')){
+      showKeyOnboarding();
+    }
+    chatBusy=false;document.getElementById('chat-send').disabled=false;return;
+  }
+  var sys=(CHAT_SYSTEMS[chatCtx]||CHAT_SYSTEMS.rep)();
+  var fullPrompt=sys+'\n\nConversation so far:\n'+chatHistory.slice(-6).map(function(m){return m.role.toUpperCase()+': '+m.content;}).join('\n\n')+'\n\nRespond as the AI Sales Coach (under 4 sentences, ask ONE question):';
+  try{
+    var text=await callGeminiRaw(getGeminiKey(),fullPrompt);
+    hideTyping();
+    var sm=text.match(/\[SAVE:\s*([^\]]+)\]/);if(sm){text=text.replace(/\[SAVE:[^\]]+\]/,'').trim();applyCapture(sm[1]);}
+    addChatMsg('ai',text||"Let's try that again.");
+    chatHistory.push({role:'assistant',content:text});
+  }catch(err){
+    hideTyping();
+    addChatMsg('ai','All AI providers unavailable right now. Error: '+err.message.substring(0,100)+'\n\nCheck your keys in Rep Profile.');
+  }
+  chatBusy=false;document.getElementById('chat-send').disabled=false;
+}
+
+
+// ── COMPANY TYPE RENDERING ──
+function renderCoTypeList(p){
+  var list=document.getElementById('cotype-list');
+  if(!list)return;
+  list.innerHTML='';
+  if(!p.companyTypes||!p.companyTypes.length){
+    list.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;border:1px dashed var(--border2);border-radius:var(--r2)">'+
+      '<div style="font-size:22px;margin-bottom:8px">&#x1F3E2;</div>'+
+      '<div style="font-weight:700;color:var(--text2);margin-bottom:4px">No company types yet</div>'+
+      '<div>Click + Add Type or use &#x26A1; Suggest to get started</div></div>';
+    return;
+  }
+  p.companyTypes.forEach(function(ct,ci){
+    var personaCount=ct.personas?ct.personas.length:0;
+    var card=document.createElement('div');
+    card.className='cotype-card';
+
+    var personasHtml='';
+    (ct.personas||[]).forEach(function(per,pi){
+      var roleColor={buyer:'var(--green)',champion:'var(--blue)',influencer:'var(--brown)',blocker:'var(--red)'}[per.role]||'var(--text3)';
+      var roleLbl={buyer:'Buyer',champion:'Champion',influencer:'Influencer',blocker:'Blocker'}[per.role]||'Persona';
+      var pipHtml='';for(var n=1;n<=5;n++) pipHtml+='<div class="cotype-persona-pip'+(n<=(per.authority||0)?' on':'')+'"></div>';
+      personasHtml+='<div class="cotype-persona-row" onclick="openPersonaModal('+pi+','+ci+')">'+
+        '<span class="cotype-persona-role" style="color:'+roleColor+';border:1px solid '+roleColor+';background:'+roleColor.replace('var(','').replace(')','')+'20,rgba(0,0,0,.05)">'+roleLbl+'</span>'+
+        '<div class="cotype-persona-title">'+esc(per.titles)+'</div>'+
+        '<div class="cotype-persona-auth">'+pipHtml+'</div>'+
+        '<div class="ico-btn del" onclick="event.stopPropagation();delPersonaFromCoType('+ci+','+pi+')">&#x2715;</div>'+
+      '</div>';
+    });
+
+    card.innerHTML=
+      '<div class="cotype-hdr" onclick="toggleCoType('+ci+')">'+
+        '<div class="cotype-hdr-left">'+
+          '<span class="cotype-toggle" id="ct-toggle-'+ci+'">&#x25B6;</span>'+
+          '<div>'+
+            '<div class="cotype-name">'+esc(ct.name)+'</div>'+
+            '<div class="cotype-meta">'+(ct.size?ct.size+' &bull; ':'')+personaCount+' persona'+(personaCount!==1?'s':'')+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="cotype-actions">'+
+          '<div class="ico-btn" onclick="event.stopPropagation();openCoTypeModal('+ci+')" title="Edit">&#x270E;</div>'+
+          '<div class="ico-btn del" onclick="event.stopPropagation();delCoType('+ci+')">&#x2715;</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="cotype-body" id="ct-body-'+ci+'">'+
+        (ct.why?'<div class="cotype-why">'+esc(ct.why)+'</div>':'')+
+        personasHtml+
+        '<button class="cotype-add-persona" onclick="openPersonaModal(null,'+ci+')">+ Add persona to '+esc(ct.name)+'</button>'+
+      '</div>';
+    list.appendChild(card);
+  });
+}
+
+function toggleCoType(ci){
+  var body=document.getElementById('ct-body-'+ci);
+  var toggle=document.getElementById('ct-toggle-'+ci);
+  if(!body)return;
+  body.classList.toggle('open');
+  if(toggle)toggle.classList.toggle('open');
+}
+
+function delPersonaFromCoType(ci,pi){
+  var p=getProd(S.activeProd);
+  if(!p||!p.companyTypes||!p.companyTypes[ci])return;
+  p.companyTypes[ci].personas.splice(pi,1);
+  renderCoTypeList(p);persist();toast('Persona removed');
+}
+
+function openCoTypeModal(idx){
+  editCoTypeIdx=idx;
+  var p=getProd(S.activeProd);
+  sv('ct-name','');sv('ct-size','');sv('ct-examples','');sv('ct-why','');
+  document.getElementById('ct-modal-title').textContent=idx!==null?'Edit Company Type':'Add a Company Type';
+  if(idx!==null&&p&&p.companyTypes&&p.companyTypes[idx]){
+    var ct=p.companyTypes[idx];
+    sv('ct-name',ct.name);sv('ct-size',ct.size||'');sv('ct-examples',ct.examples||'');sv('ct-why',ct.why||'');
+  }
+  openModal('modal-cotype');
+}
+
+var editCoTypeIdx=null;
+
+function saveCoType(){
+  var p=getProd(S.activeProd);if(!p)return;
+  var name=gv('ct-name');if(!name){document.getElementById('ct-name').focus();return;}
+  if(!p.companyTypes)p.companyTypes=[];
+  var ct={name:name,size:gv('ct-size'),examples:gv('ct-examples'),why:gv('ct-why'),personas:[]};
+  if(editCoTypeIdx!==null&&p.companyTypes[editCoTypeIdx]){
+    ct.personas=p.companyTypes[editCoTypeIdx].personas||[];
+    p.companyTypes[editCoTypeIdx]=ct;
+    closeModal('modal-cotype');
+  } else {
+    p.companyTypes.push(ct);
+    var newIdx=p.companyTypes.length-1;
+    closeModal('modal-cotype');
+    renderCoTypeList(p);persist();updateStats();
+    setTimeout(function(){toggleCoType(newIdx);toast('Company type added — add personas inside it');},100);
+    return;
+  }
+  renderCoTypeList(p);persist();updateStats();toast('Company type saved ✓');
+}
+
+function delCoType(ci){
+  var p=getProd(S.activeProd);if(!p||!p.companyTypes)return;
+  var ct=p.companyTypes[ci];
+  if(!confirm('Delete "'+ct.name+'" and its '+((ct.personas&&ct.personas.length)||0)+' persona(s)?'))return;
+  p.companyTypes.splice(ci,1);renderCoTypeList(p);persist();updateStats();toast('Deleted');
+}
+
+async function suggestCompanyTypes(){
+  var p=getProd(S.activeProd);if(!p)return;
+  var gk=getGeminiKey()||getGroqKey()||getApiKey();
+  if(!gk){toast('Add an API key to use suggestions');return;}
+  var btn=document.getElementById('cotype-autofill-btn');
+  if(btn){btn.textContent='Searching...';btn.disabled=true;}
+
+  var prompt=[
+    'B2B sales strategist. Suggest 4-5 company types that buy "'+p.name+'" ('+p.category+').',
+    'Description: '+(p.what||''),
+    'Return ONLY JSON array (no markdown):',
+    '[{"name":"Company type","size":"size range","examples":"3 example companies","why":"1 sentence why they buy","personas":[{"titles":"Title","role":"buyer","authority":4,"cares":"main concern"}]}]'
+  ].join('\n');
+
+  try{
+    var result=await callGeminiRaw(gk,prompt);
+    var suggestions=JSON.parse(result);
+    showCoTypeSuggestions(suggestions);
+  }catch(err){toast('Suggestion error: '+err.message.substring(0,60));}
+  if(btn){btn.textContent='⚡ Suggest';btn.disabled=false;}
+}
+
+function showCoTypeSuggestions(suggestions){
+  var existing=document.getElementById('modal-cotype-suggest');
+  if(existing)existing.remove();
+  var modal=document.createElement('div');
+  modal.className='modal-bd';modal.id='modal-cotype-suggest';
+  var chips=suggestions.map(function(s,i){
+    return '<div class="suggest-chip" id="ctsugg-'+i+'" onclick="toggleCtSugg('+i+')">'+
+      '<input type="checkbox" id="ctsugg-chk-'+i+'" />'+
+      '<div>'+
+        '<div class="suggest-chip-name">'+esc(s.name)+'</div>'+
+        '<div class="suggest-chip-meta">'+(s.size||'')+' &bull; '+(s.examples||'')+'</div>'+
+        '<div class="suggest-chip-meta" style="font-style:italic;margin-top:2px">'+(s.why||'')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  var mx="closeModal('modal-cotype-suggest')";
+  modal.innerHTML='<div class="modal" style="max-width:640px">'+
+    '<div class="modal-hdr"><div><div class="modal-title">Suggested Company Types</div>'+
+    '<div class="modal-sub">Select the ones that match your market</div></div>'+
+    '<div class="modal-x" onclick="'+mx+'">&#x2715;</div></div>'+
+    '<div class="modal-body"><div class="suggest-chip-grid">'+chips+'</div></div>'+
+    '<div class="modal-foot"><button class="btn btn-ghost" onclick="'+mx+'">Cancel</button>'+
+    '<button class="btn btn-primary" onclick="importCtSuggestions()">Import Selected</button></div></div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click',function(e){if(e.target===modal)closeModal('modal-cotype-suggest');});
+  window._ctSuggestions=suggestions;
+  openModal('modal-cotype-suggest');
+}
+
+function toggleCtSugg(i){
+  var chip=document.getElementById('ctsugg-'+i);
+  var chk=document.getElementById('ctsugg-chk-'+i);
+  chip.classList.toggle('sel');
+  chk.checked=chip.classList.contains('sel');
+}
+
+function importCtSuggestions(){
+  var p=getProd(S.activeProd);if(!p)return;
+  if(!p.companyTypes)p.companyTypes=[];
+  var suggs=window._ctSuggestions||[];var imported=0;
+  suggs.forEach(function(s,i){
+    var chk=document.getElementById('ctsugg-chk-'+i);
+    if(chk&&chk.checked){
+      p.companyTypes.push({
+        name:s.name,size:s.size||'',examples:s.examples||'',why:s.why||'',
+        personas:(s.personas||[]).map(function(per){
+          return {titles:per.titles||'',role:per.role||'champion',authority:per.authority||3,
+            cares:per.cares||'',style:'',language:[],obj:'',rf:''};
+        })
+      });
+      imported++;
+    }
+  });
+  closeModal('modal-cotype-suggest');
+  renderCoTypeList(p);persist();updateStats();
+  toast(imported+' company type'+(imported!==1?'s':'')+' imported ✓');
+}
+
+// ══ AI SUGGEST FOR PRODUCT SECTIONS ══
+var currentSuggestType = null;
+var currentSuggestData = null;
+
+var SUGGEST_CONFIG = {
+  pain: {
+    title: '&#x26A1; AI Suggested Pain Points',
+    sub: 'Real pains your customers report. Check the ones that apply to your product.',
+    btnLabel: 'Add Selected Pains',
+    searches: function(p){ return [
+      p.name+' '+p.category+' pain points customer problems',
+      p.name+' '+p.category+' challenges G2 reviews complaints',
+      (p.industries||[]).slice(0,2).join(' ')+' '+p.category+' buyer problems'
+    ];},
+    prompt: function(p, research){
+      return [
+        'You are a B2B sales expert. Based on research about "'+p.name+'" ('+p.category+'), identify the top pain points this product solves.',
+        'Research:\n'+research,
+        'Return ONLY a JSON array (no markdown) of 5-7 pain/solution pairs:',
+        '[{"pain":"Specific pain the buyer feels","solution":"How '+p.name+' solves it","proof":"Quantified outcome if available"}]'
+      ].join('\n');
+    },
+    renderItems: function(items){
+      return items.map(function(item, i){
+        return '<div class="suggest-item" id="si-'+i+'">'+
+          '<div style="display:flex;align-items:flex-start;gap:10px">'+
+            '<input type="checkbox" id="si-chk-'+i+'" checked style="margin-top:3px;width:15px;height:15px;accent-color:var(--green);flex-shrink:0" />'+
+            '<div style="flex:1">'+
+              '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">'+esc(item.pain||'')+'</div>'+
+              '<div style="font-size:12px;color:var(--blue);margin-bottom:2px">&#x2192; '+esc(item.solution||'')+'</div>'+
+              (item.proof?'<div style="font-size:11px;color:var(--green);font-weight:600">&#x1F4CA; '+esc(item.proof)+'</div>':'')+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+    },
+    apply: function(items){
+      items.forEach(function(item){ if(item) addPain(item); });
+    }
+  },
+
+  triggers: {
+    title: '&#x26A1; AI Suggested Buying Triggers',
+    sub: 'Events that signal a prospect is in an active buying window. Check the ones relevant to your market.',
+    btnLabel: 'Add Selected Triggers',
+    searches: function(p){ return [
+      p.name+' '+p.category+' buying triggers when companies buy',
+      p.name+' ideal customer profile buying signals timing',
+      (p.industries||[]).slice(0,2).join(' ')+' software purchase triggers events'
+    ];},
+    prompt: function(p, research){
+      return [
+        'You are a B2B sales expert. Identify buying triggers — events that signal a company is ready to buy "'+p.name+'" ('+p.category+').',
+        'Research:\n'+research,
+        'Return ONLY a JSON array of 6-10 specific trigger strings (no markdown):',
+        '["Trigger event 1","Trigger event 2"]',
+        'Each trigger should be a specific, observable event — not vague. Examples: "New CFO hired in last 90 days", "Company just completed acquisition", "Announced expansion to new market".'
+      ].join('\n');
+    },
+    renderItems: function(items){
+      return '<div style="display:flex;flex-direction:column;gap:6px">'+
+        items.map(function(item, i){
+          return '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--brown-bg);border:1px solid var(--brown-b);border-radius:var(--r);cursor:pointer" id="si-'+i+'">'+
+            '<input type="checkbox" id="si-chk-'+i+'" checked style="width:14px;height:14px;accent-color:var(--green);flex-shrink:0" />'+
+            '<span style="font-size:13px;font-weight:500;color:var(--brown)">'+esc(typeof item==='string'?item:item.trigger||JSON.stringify(item))+'</span>'+
+          '</label>';
+        }).join('')+
+      '</div>';
+    },
+    apply: function(items){
+      items.forEach(function(item){
+        var text = typeof item==='string'?item:(item.trigger||'');
+        if(text) addTag('pd-trig', text);
+      });
+    }
+  },
+
+  objections: {
+    title: '&#x26A1; AI Suggested Objections',
+    sub: 'Real objections buyers raise about products like yours. Check the ones you hear.',
+    btnLabel: 'Add Selected Objections',
+    searches: function(p){ return [
+      p.name+' '+p.category+' sales objections why customers say no',
+      p.name+' objections "too expensive" OR "not a priority" OR "we already have"',
+      p.category+' common objections B2B sales'
+    ];},
+    prompt: function(p, research){
+      return [
+        'You are a B2B sales expert. Identify common objections buyers raise when evaluating "'+p.name+'" ('+p.category+'), and provide sharp responses.',
+        'Rep methodology: '+(S.rep.methodology||[]).join(', ')||'consultative',
+        'Research:\n'+research,
+        'Return ONLY a JSON array of 5-7 objection/response pairs (no markdown):',
+        '[{"objection":"The exact words a buyer says","response":"A sharp, methodology-aligned response that addresses the concern without being pushy"}]'
+      ].join('\n');
+    },
+    renderItems: function(items){
+      return items.map(function(item, i){
+        return '<div class="suggest-item" id="si-'+i+'">'+
+          '<div style="display:flex;align-items:flex-start;gap:10px">'+
+            '<input type="checkbox" id="si-chk-'+i+'" checked style="margin-top:3px;width:15px;height:15px;accent-color:var(--green);flex-shrink:0" />'+
+            '<div style="flex:1">'+
+              '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--red);margin-bottom:3px">Objection</div>'+
+              '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;font-style:italic">"'+esc(item.objection||'')+'"</div>'+
+              '<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--green);margin-bottom:3px">Response</div>'+
+              '<div style="font-size:13px;color:var(--text2)">'+esc(item.response||'')+'</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+    },
+    apply: function(items){
+      items.forEach(function(item){ if(item&&item.objection) addObj(item); });
+    }
+  },
+
+  competition: {
+    title: '&#x26A1; AI Suggested Competitors',
+    sub: 'Competitors buyers compare you against. Check the ones you actually run into.',
+    btnLabel: 'Add Selected Competitors',
+    searches: function(p){ return [
+      p.name+' vs competitors alternatives comparison',
+      p.category+' competitors top vendors comparison',
+      p.name+' competitive landscape who else do buyers consider'
+    ];},
+    prompt: function(p, research){
+      return [
+        'You are a competitive intelligence analyst. Identify the main competitors to "'+p.name+'" ('+p.category+') and provide honest battle card data.',
+        'Research:\n'+research,
+        'Return ONLY a JSON array of 4-6 competitors (no markdown):',
+        '[{"name":"Competitor name","howWeBeat":"2-3 specific ways '+p.name+' wins","whenTheyWin":"Honest: 1-2 situations where the competitor tends to win","positioning":"How they describe themselves in 1 sentence"}]'
+      ].join('\n');
+    },
+    renderItems: function(items){
+      return items.map(function(item, i){
+        return '<div class="suggest-item" id="si-'+i+'">'+
+          '<div style="display:flex;align-items:flex-start;gap:10px">'+
+            '<input type="checkbox" id="si-chk-'+i+'" checked style="margin-top:3px;width:15px;height:15px;accent-color:var(--green);flex-shrink:0" />'+
+            '<div style="flex:1">'+
+              '<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">'+esc(item.name||'')+'</div>'+
+              (item.positioning?'<div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:6px">'+esc(item.positioning)+'</div>':'')+
+              '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+                '<div style="background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--r);padding:7px 9px">'+
+                  '<div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">We win when</div>'+
+                  '<div style="font-size:12px;color:var(--text2)">'+esc(item.howWeBeat||'')+'</div>'+
+                '</div>'+
+                '<div style="background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);padding:7px 9px">'+
+                  '<div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">They win when</div>'+
+                  '<div style="font-size:12px;color:var(--text2)">'+esc(item.whenTheyWin||'')+'</div>'+
+                '</div>'+
+              '</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+    },
+    apply: function(items){
+      items.forEach(function(item){ if(item&&item.name) addComp(item); });
+    }
+  }
+};
+
+async function suggestSection(type){
+  var p = getProd(S.activeProd); if(!p) return;
+  var cfg = SUGGEST_CONFIG[type]; if(!cfg) return;
+  var gk = getGeminiKey()||getGroqKey()||getApiKey();
+  if(!gk){ toast('Add an API key to use AI suggestions'); return; }
+
+  currentSuggestType = type;
+  currentSuggestData = null;
+
+  // Set btn to loading state
+  var btnId = 'suggest-'+type+'-btn';
+  var btn = document.getElementById(btnId);
+  if(btn){ btn.textContent='Searching...'; btn.disabled=true; }
+
+  // Open modal in loading state
+  document.getElementById('suggest-modal-title').innerHTML = cfg.title;
+  document.getElementById('suggest-modal-sub').textContent = cfg.sub;
+  document.getElementById('suggest-modal-foot').style.display='none';
+  document.getElementById('suggest-modal-body').innerHTML =
+    '<div style="text-align:center;padding:28px;color:var(--text3)">'+
+    '<div style="font-size:24px;margin-bottom:8px">&#x23F3;</div>'+
+    '<div style="font-size:13px;font-weight:600;color:var(--text)">Searching the web for '+esc(p.name)+'...</div>'+
+    '<div style="font-size:11px;margin-top:5px;color:var(--text3)" id="suggest-loading-sub">Running searches...</div>'+
+    '</div>';
+  openModal('modal-suggest');
+
+  var sub = document.getElementById('suggest-loading-sub');
+
+  try {
+    // Fetch search data
+    var sk = getSerperKey();
+    var searchQueries = cfg.searches(p);
+    var research = '';
+
+    if(sk){
+      if(sub) sub.textContent = 'Fetching live web data...';
+      var results = await Promise.all(searchQueries.map(function(q){ return serperSearch(sk, q); }));
+      research = results.filter(Boolean).join('\n\n');
+    } else {
+      if(sub) sub.textContent = 'No Serper key — using AI knowledge only (add Serper key for live data)...';
+      research = 'No web search available. Use your training knowledge about '+p.name+' in the '+p.category+' space.';
+    }
+
+    if(sub) sub.textContent = 'Generating suggestions with AI...';
+
+    var prompt = cfg.prompt(p, research.substring(0, 3000));
+    var result = await callGeminiRaw(gk, prompt);
+    var items = JSON.parse(result);
+
+    if(!Array.isArray(items)||!items.length) throw new Error('No suggestions returned');
+
+    currentSuggestData = items;
+
+    // Render results
+    var body = document.getElementById('suggest-modal-body');
+    body.innerHTML =
+      '<div style="font-size:12px;color:var(--text2);margin-bottom:12px;padding:8px 10px;background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:var(--r)">'+
+        '&#x2713; Found '+items.length+' suggestions. Uncheck any you don\'t want before adding.'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:8px" id="suggest-items-list">'+
+        cfg.renderItems(items)+
+      '</div>';
+
+    // Wire apply button
+    var foot = document.getElementById('suggest-modal-foot');
+    foot.style.display='flex';
+    var applyBtn = document.getElementById('suggest-apply-btn');
+    applyBtn.textContent = cfg.btnLabel;
+    applyBtn.onclick = function(){ applySuggestions(type); };
+
+  } catch(err) {
+    document.getElementById('suggest-modal-body').innerHTML =
+      '<div style="padding:16px;background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);color:var(--red);font-size:13px">'+
+        '<strong>Error:</strong> '+esc(err.message||'Something went wrong.')+
+        '<br><br><div style="font-size:11px;color:var(--text2)">Make sure you have a Gemini or Groq key in Rep Profile. Adding a Serper key gives much better results.</div>'+
+      '</div>';
+  }
+
+  if(btn){ btn.textContent='\u26A1 AI Suggest'; btn.disabled=false; }
+}
+
+function applySuggestions(type){
+  var cfg = SUGGEST_CONFIG[type]; if(!cfg||!currentSuggestData) return;
+  var selected = [];
+  currentSuggestData.forEach(function(item, i){
+    var chk = document.getElementById('si-chk-'+i);
+    if(chk&&chk.checked) selected.push(item);
+  });
+  if(!selected.length){ toast('Select at least one item'); return; }
+  cfg.apply(selected);
+  closeModal('modal-suggest');
+  toast(selected.length+' item'+(selected.length!==1?'s':'')+' added \u2713');
+}
+
+// ── Suggest modal CSS (injected once) ──
+(function(){
+  var style=document.createElement('style');
+  style.textContent=
+    '.suggest-item{padding:12px 14px;background:white;border:1px solid var(--border);border-radius:var(--r);transition:border-color .12s}'+
+    '.suggest-item:hover{border-color:var(--border2)}'+
+    '.suggest-item input:checked ~ div .suggest-check{display:block}';
+  document.head.appendChild(style);
+})();
+
+function applyCapture(c){
+  c.split(',').forEach(function(pair){var m=pair.match(/([^:]+):\s*(.+)/);if(!m)return;var k=m[1].trim().toLowerCase(),v=m[2].trim();
+    if(k.includes('name')&&!k.includes('company'))sv('rep-name',v);
+    if(k.includes('company'))sv('rep-company',v);
+    if(k.includes('quota'))sv('rep-quota',v.replace(/[^0-9]/g,''));
+    if(k.includes('territory'))sv('rep-territory',v);
+  });
+}
+
+// ── SERPER KEY ──
+function checkGroqKey(){
+  var key=document.getElementById('groq-apikey').value.trim();
+  var el=document.getElementById('groq-status');
+  if(key.startsWith('gsk_')&&key.length>20){
+    el.innerHTML='<div class="api-dot" style="background:var(--green)"></div><span style="color:var(--green)">Groq key ready \u2014 fast free fallback active</span>';
+  } else if(key.length>0){
+    el.innerHTML='<div class="api-dot" style="background:var(--brown)"></div><span style="color:var(--brown)">Format looks off \u2014 Groq keys start with gsk_</span>';
+  } else {
+    el.innerHTML='<div class="api-dot" style="background:var(--border2)"></div><span style="color:var(--text3)">No key \u2014 great free fallback when Gemini is busy</span>';
+  }
+}
+
+function checkOpenAIKey(){
+  var key=document.getElementById('openai-apikey').value.trim();
+  var el=document.getElementById('openai-status');
+  if(key.startsWith('sk-')&&key.length>20){
+    el.innerHTML='<div class="api-dot" style="background:var(--green)"></div><span style="color:var(--green)">OpenAI key ready</span>';
+  } else if(key.length>0){
+    el.innerHTML='<div class="api-dot" style="background:var(--brown)"></div><span style="color:var(--brown)">Format looks off \u2014 OpenAI keys start with sk-</span>';
+  } else {
+    el.innerHTML='<div class="api-dot" style="background:var(--border2)"></div><span style="color:var(--text3)">No key \u2014 optional paid fallback</span>';
+  }
+}
+
+function getGroqKey(){ return document.getElementById('groq-apikey').value.trim()||localStorage.getItem('aisw4_groqkey')||''; }
+function getOpenAIKey(){ return document.getElementById('openai-apikey').value.trim()||localStorage.getItem('aisw4_openaikey')||''; }
+
+function checkSerperKey(){
+  var key=document.getElementById('serper-apikey').value.trim();
+  var el=document.getElementById('serper-status');
+  if(key.length>10){
+    el.innerHTML='<div class="api-dot" style="background:var(--green)"></div><span style="color:var(--green)">Serper key saved — Auto-Fill is ready</span>';
+  } else if(key.length>0){
+    el.innerHTML='<div class="api-dot" style="background:var(--brown)"></div><span style="color:var(--brown)">Key looks too short — check serper.dev</span>';
+  } else {
+    el.innerHTML='<div class="api-dot" style="background:var(--border2)"></div><span style="color:var(--text3)">No key — Auto-Fill needs this to search the web</span>';
+  }
+}
+
+function getSerperKey(){
+  return document.getElementById('serper-apikey').value.trim()||localStorage.getItem('aisw4_serperkey')||'';
+}
+
+function openAutoFillModal(){
+  var gk=getGeminiKey(),sk=getSerperKey();
+  var warn=document.getElementById('af-key-warning');
+  var btn=document.getElementById('af-start-btn');
+  var missing=[];
+  if(!gk) missing.push('Gemini API key (AI Coach)');
+  if(!sk) missing.push('Serper API key (web search)');
+  if(missing.length){
+    warn.style.display='block';
+    warn.innerHTML='⚠️ Missing keys: <strong>'+missing.join(', ')+'</strong>. Add them in the API Keys section above and save first.';
+    btn.disabled=true;btn.style.opacity='0.5';
+  } else {
+    warn.style.display='none';
+    btn.disabled=false;btn.style.opacity='1';
+  }
+  // Pre-fill company if already set
+  var company=gv('rep-company');
+  if(company) document.getElementById('af-company').value=company;
+  openModal('modal-autofill');
+}
+
+// ── STAGE 1: Company + Product layer ──
+var afStage1Data=null;
+
+async function startAutoFillStage1(){
+  var company=document.getElementById('af-company').value.trim();
+  var role=document.getElementById('af-role').value.trim();
+  if(!company||!role){toast('Enter company and role first');return;}
+
+  closeModal('modal-autofill');
+  openModal('modal-af-preview');
+  document.getElementById('af-preview-title').textContent='Stage 1 — Company & Products';
+  document.getElementById('af-preview-sub').textContent='Searching the web for '+company+'...';
+  document.getElementById('af-preview-foot').style.display='none';
+  document.getElementById('af-preview-body').innerHTML=
+    '<div style="text-align:center;padding:32px;color:var(--text3)">'+
+    '<div style="font-size:28px;margin-bottom:10px">⏳</div>'+
+    '<div style="font-size:13px;font-weight:600;color:var(--text)">Searching the web for '+company+'...</div>'+
+    '<div style="font-size:11px;margin-top:8px;color:var(--text3)" id="af-progress-lbl">Running searches...</div></div>';
+
+  var serperKey=getSerperKey();
+  var geminiKey=getGeminiKey();
+  var progress=document.getElementById('af-progress-lbl');
+
+  try {
+    // Run 3 targeted searches in parallel
+    if(progress) progress.textContent='Searching: products, competitors, target market...';
+    var searches = await Promise.all([
+      serperSearch(serperKey, company+' products software solutions overview'),
+      serperSearch(serperKey, company+' competitors alternatives'),
+      serperSearch(serperKey, company+' target customers industries use cases'),
+      serperSearch(serperKey, company+' G2 reviews pricing')
+    ]);
+
+    if(progress) progress.textContent='Synthesizing with Gemini...';
+
+    var searchContext = searches.map(function(r,i){
+      return '=== Search '+(i+1)+' ===\n'+(r||'No results');
+    }).join('\n\n');
+
+    var prompt = [
+      'You are a sales intelligence analyst. Based on the web search results below, extract structured information about '+company+'.',
+      'Rep context: "'+role+'"',
+      'SEARCH RESULTS:\n'+searchContext,
+      'Return ONLY valid JSON in this exact structure (no markdown, no backticks):',
+      '{',
+      '  "companyOverview": "2-3 sentence description of what the company does",',
+      '  "products": [',
+      '    {',
+      '      "name": "Product name",',
+      '      "description": "One sentence plain English description",',
+      '      "category": "Category/type",',
+      '      "targetIndustries": ["Industry1","Industry2"],',
+      '      "estimatedDealSize": "e.g. $25,000-$80,000 ACV",',
+      '      "estimatedCycle": "e.g. 60-90 days"',
+      '    }',
+      '  ],',
+      '  "competitors": ["Competitor1","Competitor2","Competitor3"],',
+      '  "keyIndustries": ["Industry1","Industry2","Industry3"]',
+      '}'
+    ].join('\n');
+
+    var result = await callGeminiRaw(geminiKey, prompt);
+    afStage1Data = JSON.parse(result);
+    afStage1Data._company = company;
+    afStage1Data._role = role;
+
+    renderStage1Preview(afStage1Data);
+
+  } catch(err) {
+    document.getElementById('af-preview-body').innerHTML=
+      '<div style="padding:20px;background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);color:var(--red);font-size:13px">'+
+      '<strong>Error:</strong> '+esc(err.message||'Something went wrong. Check your API keys and try again.')+'</div>';
+  }
+}
+
+function renderStage1Preview(data){
+  var body=document.getElementById('af-preview-body');
+  var html='';
+
+  // Editable company overview
+  html+=
+    '<div style="background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:var(--r);padding:12px 14px;margin-bottom:16px">'+
+      '<div class="field-lbl" style="color:var(--blue);margin-bottom:6px">Company Overview <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">(click to edit)</span></div>'+
+      '<textarea id="af-overview-edit" rows="3" style="width:100%;font-size:13px;line-height:1.6;border:1px solid var(--blue-b);border-radius:4px;padding:6px 8px;background:white;font-family:Arial,sans-serif;resize:vertical;outline:none">'+esc(data.companyOverview||'')+'</textarea>'+
+    '</div>';
+
+  // Products header + add button
+  html+=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+      '<div class="field-lbl">Products — uncheck to exclude, edit any field</div>'+
+      '<button onclick="afAddProduct()" style="background:var(--green);color:white;border:none;border-radius:4px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:Arial,sans-serif">+ Add Product</button>'+
+    '</div>'+
+    '<div id="af-prod-list">';
+
+  (data.products||[]).forEach(function(p,i){ html+=afProductCard(p,i); });
+  html+='</div>';
+
+  // Editable competitors
+  html+=
+    '<div style="margin-top:14px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">'+
+        '<div class="field-lbl">Competitors</div>'+
+        '<button onclick="afAddCompetitor()" style="background:transparent;border:1px solid var(--border2);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);font-family:Arial,sans-serif">+ Add</button>'+
+      '</div>'+
+      '<div id="af-comp-list" style="display:flex;flex-wrap:wrap;gap:5px">';
+  (data.competitors||[]).forEach(function(c,i){ html+=afCompChip(c,i); });
+  html+='</div></div>';
+
+  body.innerHTML=html;
+
+  var foot=document.getElementById('af-preview-foot');
+  foot.style.display='flex';
+  document.getElementById('af-confirm-btn').textContent='Confirm & Build Personas →';
+  document.getElementById('af-confirm-btn').onclick=confirmStage1;
+}
+
+function afProductCard(p,i){
+  return '<div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;margin-bottom:8px" id="af-prod-card-'+i+'">'+
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+      '<input type="checkbox" id="af-prod-chk-'+i+'" checked style="width:15px;height:15px;accent-color:var(--green);flex-shrink:0" />'+
+      '<input type="text" id="af-prod-name-'+i+'" value="'+esc(p.name||'')+'" placeholder="Product name" style="font-family:Arial,sans-serif;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:14px;font-weight:700;flex:1;outline:none;background:white" />'+
+      '<input type="text" id="af-prod-cat-'+i+'" value="'+esc(p.category||'')+'" placeholder="Category" style="font-family:Arial,sans-serif;border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-size:11px;font-weight:600;color:var(--text2);width:160px;outline:none;background:white" />'+
+      '<div class="ico-btn del" onclick="document.getElementById(\'af-prod-card-'+i+'\').remove()" title="Remove">&#x2715;</div>'+
+    '</div>'+
+    '<textarea id="af-prod-desc-'+i+'" rows="2" placeholder="One-sentence description..." style="width:100%;font-size:12px;margin-bottom:8px;font-family:Arial,sans-serif;border-radius:4px;padding:6px 8px;border:1px solid var(--border);resize:vertical;outline:none">'+esc(p.description||'')+'</textarea>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:8px">'+
+      '<div><div class="field-lbl" style="font-size:9px;margin-bottom:3px">Deal size</div>'+
+        '<input type="text" id="af-prod-deal-'+i+'" value="'+esc(p.estimatedDealSize||'')+'" placeholder="e.g. $45,000 ACV" style="font-size:12px;font-family:Arial,sans-serif" /></div>'+
+      '<div><div class="field-lbl" style="font-size:9px;margin-bottom:3px">Sales cycle</div>'+
+        '<input type="text" id="af-prod-cycle-'+i+'" value="'+esc(p.estimatedCycle||'')+'" placeholder="e.g. 60-90 days" style="font-size:12px;font-family:Arial,sans-serif" /></div>'+
+      '<div><div class="field-lbl" style="font-size:9px;margin-bottom:3px">Industries (comma-separated)</div>'+
+        '<input type="text" id="af-prod-ind-'+i+'" value="'+esc((p.targetIndustries||[]).join(', '))+'" placeholder="Manufacturing, Healthcare..." style="font-size:12px;font-family:Arial,sans-serif" /></div>'+
+    '</div>'+
+  '</div>';
+}
+
+
+var afNewProdCount=0;
+function afAddProduct(){
+  afNewProdCount++;
+  var i='new'+afNewProdCount;
+  var div=document.createElement('div');
+  div.innerHTML=afProductCard({name:'',category:'',description:'',estimatedDealSize:'',estimatedCycle:'',targetIndustries:[]},i);
+  document.getElementById('af-prod-list').appendChild(div.firstChild);
+  var nameEl=document.getElementById('af-prod-name-'+i);
+  if(nameEl){nameEl.style.borderColor='var(--blue)';nameEl.style.background='white';nameEl.focus();}
+}
+
+var afCompCount=0;
+function afAddCompetitor(){
+  afCompCount++;
+  var i='c'+afCompCount;
+  var list=document.getElementById('af-comp-list');
+  var span=document.createElement('span');
+  span.id='af-comp-'+i;
+  span.style.cssText='display:inline-flex;align-items:center;gap:4px;background:var(--red-bg);color:var(--red);border:1px solid var(--red-b);border-radius:4px;padding:2px 6px 2px 9px;font-size:12px;font-weight:600';
+  span.innerHTML='<input type="text" placeholder="Competitor name" style="background:transparent;border:none;outline:none;font-size:12px;font-weight:600;color:var(--red);width:120px;font-family:Arial,sans-serif" />'+
+    '<span onclick="this.parentNode.remove()" style="cursor:pointer;opacity:.6;margin-left:2px">&#x2715;</span>';
+  list.appendChild(span);
+  span.querySelector('input').focus();
+}
+
+function afCompChip(c,i){
+  var w=Math.max(70,c.length*8);
+  return '<span id="af-comp-chip-'+i+'" style="display:inline-flex;align-items:center;gap:4px;background:var(--red-bg);color:var(--red);border:1px solid var(--red-b);border-radius:4px;padding:2px 6px 2px 9px;font-size:12px;font-weight:600">'+
+    '<input type="text" value="'+esc(c)+'" style="background:transparent;border:none;outline:none;font-size:12px;font-weight:600;color:var(--red);width:'+w+'px;font-family:Arial,sans-serif" oninput="this.style.width=(this.value.length*8+20)+\'px\'" />'+
+    '<span onclick="this.parentNode.remove()" style="cursor:pointer;opacity:.6;margin-left:2px">&#x2715;</span>'+
+  '</span>';
+}
+
+async function confirmStage1(){
+  if(!afStage1Data)return;
+
+  // Read edited overview
+  var ovEl=document.getElementById('af-overview-edit');
+  if(ovEl) afStage1Data.companyOverview=ovEl.value.trim();
+
+  // Read all product cards (checked only)
+  var selectedProducts=[];
+  document.querySelectorAll('[id^="af-prod-card-"]').forEach(function(card){
+    var i=card.id.replace('af-prod-card-','');
+    var chk=document.getElementById('af-prod-chk-'+i);
+    if(!chk||!chk.checked)return;
+    var indRaw=(document.getElementById('af-prod-ind-'+i)||{value:''}).value;
+    selectedProducts.push({
+      name:       (document.getElementById('af-prod-name-'+i)||{value:''}).value.trim(),
+      category:   (document.getElementById('af-prod-cat-'+i)||{value:''}).value.trim(),
+      description:(document.getElementById('af-prod-desc-'+i)||{value:''}).value.trim(),
+      estimatedDealSize: (document.getElementById('af-prod-deal-'+i)||{value:''}).value.trim(),
+      estimatedCycle:    (document.getElementById('af-prod-cycle-'+i)||{value:''}).value.trim(),
+      targetIndustries:  indRaw.split(',').map(function(s){return s.trim();}).filter(Boolean)
+    });
+  });
+
+  // Read competitors
+  var competitors=[];
+  document.querySelectorAll('#af-comp-list input').forEach(function(inp){var v=inp.value.trim();if(v)competitors.push(v);});
+  afStage1Data.competitors=competitors;
+
+  if(!selectedProducts.length){toast('Check at least one product to continue');return;}
+  // Deduplicate by name
+  var seen={};
+  selectedProducts=selectedProducts.filter(function(p){
+    if(!p.name||seen[p.name])return false;seen[p.name]=true;return true;
+  });
+  afStage1Data.selectedProducts=selectedProducts;
+
+  // Move to Stage 2
+  document.getElementById('af-preview-title').textContent='Stage 2 — Personas & Pain Points';
+  document.getElementById('af-preview-sub').textContent='Building personas for '+selectedProducts.length+' product(s)...';
+  document.getElementById('af-preview-foot').style.display='none';
+  document.getElementById('af-preview-body').innerHTML=
+    '<div style="text-align:center;padding:32px;color:var(--text3)">'+
+    '<div style="font-size:28px;margin-bottom:10px">⏳</div>'+
+    '<div style="font-size:13px;font-weight:600;color:var(--text)">Generating personas and pain points...</div>'+
+    '<div style="font-size:11px;margin-top:8px;color:var(--text3)" id="af-progress-lbl">Asking Gemini to build your playbook...</div></div>';
+
+  var geminiKey=getGeminiKey();
+  var serperKey=getSerperKey();
+
+  try {
+    var progress=document.getElementById('af-progress-lbl');
+    if(progress) progress.textContent='Searching for persona and pain data...';
+
+    // Search for persona/pain info
+    var painSearches=await Promise.all(selectedProducts.slice(0,2).map(function(p){
+      return serperSearch(serperKey, afStage1Data._company+' '+p.name+' buyer pain points value proposition use cases');
+    }));
+
+    if(progress) progress.textContent='Building personas and pain maps...';
+
+    // Process products one at a time if multiple — avoids truncation
+    var allProds=[];
+    for(var pi=0;pi<selectedProducts.length;pi++){
+      var sp=selectedProducts[pi];
+      var research=painSearches[pi]||painSearches[0]||'';
+      if(progress) progress.textContent='Building playbook for '+sp.name+'... ('+(pi+1)+'/'+selectedProducts.length+')';
+
+      var singlePrompt=[
+        'B2B sales strategist. One product playbook for '+afStage1Data._company+'. Rep: "'+afStage1Data._role+'".',
+        'Product: '+sp.name+' | '+sp.category+' | '+sp.description,
+        'Research: '+research.substring(0,1500),
+        'Return ONLY JSON (no markdown):',
+        '{"name":"'+sp.name+'","companyTypes":[{"name":"Company type","size":"size range","why":"why they buy","personas":[{"titles":"Title","role":"buyer","authority":4,"cares":"pain","style":"how to sell"}]}],"pains":[{"pain":"pain","solution":"solution","proof":"metric"}],"triggers":["trigger"],"objections":[{"objection":"obj","response":"resp"}],"valueProps":["prop"]}'
+      ].join('\n');
+
+      try{
+        var r=await callGeminiRaw(geminiKey,singlePrompt);
+        var parsed=JSON.parse(r);
+        allProds.push(parsed);
+      }catch(e){
+        // If JSON parse fails, still try to show what we got
+        allProds.push({name:sp.name,pains:[],companyTypes:[],triggers:[],objections:[],valueProps:[],_error:e.message});
+      }
+    }
+
+    var stage2Data={products:allProds};
+    renderStage2Preview(stage2Data, afStage1Data);
+
+  } catch(err){
+    document.getElementById('af-preview-body').innerHTML=
+      '<div style="padding:20px;background:var(--red-bg);border:1px solid var(--red-b);border-radius:var(--r);color:var(--red);font-size:13px">'+
+      '<strong>Stage 2 error:</strong> '+esc(err.message||'Something went wrong.')+
+      '<br><br><div style="font-size:11px;color:var(--text2)">Tip: Try the Gemini 2.0 Flash Lite or Groq model option — they handle multi-product prompts more reliably.</div></div>';
+  }
+}
+
+function renderStage2Preview(data, stage1){
+  var body=document.getElementById('af-preview-body');
+  var html='<div style="font-size:12px;color:var(--text2);margin-bottom:14px;padding:9px 12px;background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--r)">✓ Playbook draft ready. Review below, then click Apply to write everything to your playbook.</div>';
+
+  (data.products||[]).forEach(function(prod,pi){
+    html+='<div style="border:1px solid var(--border);border-radius:var(--r2);margin-bottom:14px;overflow:hidden">'+
+      '<div style="background:#f8f9fa;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text)">'+esc(prod.name||'Product')+'</div>'+
+      '<div style="padding:12px 14px">';
+
+    // Personas
+    if(prod.personas&&prod.personas.length){
+      html+='<div class="field-lbl" style="margin-bottom:6px">Personas ('+prod.personas.length+')</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">';
+      prod.personas.forEach(function(per){
+        var roleColor={buyer:'var(--green)',champion:'var(--blue)',influencer:'var(--brown)',blocker:'var(--red)'}[per.role]||'var(--text3)';
+        html+='<div style="background:white;border:1px solid var(--border);border-radius:var(--r);padding:6px 10px;font-size:11px">'+
+          '<div style="color:'+roleColor+';font-weight:700;font-size:10px;text-transform:uppercase">'+esc(per.role||'')+'</div>'+
+          '<div style="font-weight:600;color:var(--text);margin-top:1px">'+esc(per.titles||'')+'</div>'+
+          '<div style="color:var(--text3);margin-top:2px;font-size:10px;max-width:160px">'+esc((per.cares||'').substring(0,80))+'...</div>'+
+        '</div>';
+      });
+      html+='</div>';
+    }
+
+    // Pains
+    if(prod.pains&&prod.pains.length){
+      html+='<div class="field-lbl" style="margin-bottom:6px">Pain Points ('+prod.pains.length+')</div>';
+      prod.pains.slice(0,3).forEach(function(p){
+        html+='<div style="font-size:12px;padding:6px 10px;background:#f8f9fa;border-radius:var(--r);margin-bottom:4px;border-left:3px solid var(--brown)">'+
+          '<strong>'+esc(p.pain||'')+'</strong>'+
+          (p.proof?'<span style="color:var(--text3);margin-left:8px">→ '+esc(p.proof)+'</span>':'')+
+        '</div>';
+      });
+    }
+
+    // Triggers
+    if(prod.triggers&&prod.triggers.length){
+      html+='<div class="field-lbl" style="margin-top:8px;margin-bottom:6px">Buying Triggers</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px">';
+      prod.triggers.forEach(function(t){
+        html+='<span style="background:var(--amber-d,#fdf7ec);color:var(--brown);border:1px solid var(--brown-b);border-radius:3px;padding:2px 7px;font-size:11px;font-weight:600">'+esc(t)+'</span>';
+      });
+      html+='</div>';
+    }
+
+    html+='</div></div>';
+  });
+
+  body.innerHTML=html;
+
+  // Store for apply
+  window._afStage2Data=data;
+  window._afStage1Data=stage1;
+
+  var foot=document.getElementById('af-preview-foot');
+  foot.style.display='flex';
+  var confirmBtn=document.getElementById('af-confirm-btn');
+  confirmBtn.textContent='✓ Apply to Playbook';
+  confirmBtn.onclick=applyAutoFill;
+}
+
+function applyAutoFill(){
+  var data=window._afStage2Data;
+  var stage1=window._afStage1Data;
+  if(!data||!stage1)return;
+
+  // Set company name if blank
+  if(!gv('rep-company')&&stage1._company) sv('rep-company',stage1._company);
+
+  var allCompetitors=(stage1.competitors||[]).map(function(c){return {name:c,howWeBeat:'',whenTheyWin:''};});
+
+  // Deduplicate existing products by name before adding
+  var existingNames={};
+  S.products.forEach(function(p){existingNames[p.name]=true;});
+
+  (data.products||[]).forEach(function(prod){
+    if(!prod.name||existingNames[prod.name])return; // skip dupes
+    existingNames[prod.name]=true;
+
+    var s1prod=(stage1.selectedProducts||[]).find(function(p){return p.name===prod.name;})||{};
+
+    // Use companyTypes from Stage 2 if Gemini returned them, otherwise fall back to flat personas
+    var companyTypes=[];
+    if(prod.companyTypes&&prod.companyTypes.length){
+      companyTypes=prod.companyTypes.map(function(ct){
+        return {
+          name:ct.name||'General',
+          size:ct.size||'',
+          examples:ct.examples||'',
+          why:ct.why||'',
+          personas:(ct.personas||[]).map(function(per){
+            return {titles:per.titles||'',role:per.role||'champion',authority:per.authority||3,cares:per.cares||'',style:per.style||'',language:per.language||[],obj:'',rf:''};
+          })
+        };
+      });
+    } else if(prod.personas&&prod.personas.length){
+      // Flat personas fallback — wrap in a General company type
+      companyTypes=[{
+        name:'General',size:'',examples:'',
+        why:'Auto-filled — use \u26A1 Suggest to add specific company types',
+        personas:(prod.personas||[]).map(function(per){
+          return {titles:per.titles||'',role:per.role||'champion',authority:per.authority||3,cares:per.cares||'',style:per.style||'',language:per.language||[],obj:'',rf:''};
+        })
+      }];
+    }
+
+    var newProd={
+      id:'p'+Date.now()+(Math.random()*1000|0),
+      name:prod.name||'',
+      desc:s1prod.description||'',
+      color:PROD_COLORS[S.products.length%PROD_COLORS.length],
+      category:s1prod.category||'',
+      what:s1prod.description||'',
+      deal:s1prod.estimatedDealSize||'',
+      cycle:s1prod.estimatedCycle||'',
+      coSize:'',
+      industries:s1prod.targetIndustries||[],
+      pains:(prod.pains||[]),
+      triggers:prod.triggers||[],
+      roi:prod.valueProps||[],
+      wins:[],
+      objections:prod.objections||[],
+      competitors:allCompetitors,
+      companyTypes:companyTypes
+    };
+    S.products.push(newProd);
+  });
+
+  closeModal('modal-af-preview');
+  renderSidebar();renderOverview();updateBadge();persist();updateComp();updateStats();
+  toast('✓ Playbook auto-filled — click any product card to edit');
+  showPanel('products');
+}
+
+// ── SERPER SEARCH HELPER ──
+async function serperSearch(apiKey, query){
+  var resp=await fetch('https://google.serper.dev/search',{
+    method:'POST',
+    headers:{'X-API-KEY':apiKey,'Content-Type':'application/json'},
+    body:JSON.stringify({q:query,num:5})
+  });
+  var data=await resp.json();
+  // Extract text snippets
+  var snippets=[];
+  if(data.answerBox&&data.answerBox.snippet) snippets.push(data.answerBox.snippet);
+  (data.organic||[]).slice(0,4).forEach(function(r){
+    if(r.snippet) snippets.push(r.title+': '+r.snippet);
+  });
+  return snippets.join('\n');
+}
+
+// ── JSON repair — handles truncated responses ──
+function repairJSON(str){
+  // Try parse first
+  try{JSON.parse(str);return str;}catch(e){}
+  // Count open/close braces and brackets
+  var opens=0,closes=0,aopens=0,acloses=0;
+  for(var i=0;i<str.length;i++){
+    var c=str[i];
+    if(c==='{')opens++;else if(c==='}')closes++;
+    else if(c==='[')aopens++;else if(c===']')acloses++;
+  }
+  var repaired=str;
+  // Close any open strings first (find last quote situation)
+  var lastChar=repaired[repaired.length-1];
+  if(lastChar!=='"'&&lastChar!=='}'&&lastChar!==']'&&lastChar!==','){ 
+    // Truncated mid-value — close the string and object
+    repaired+='"';
+  }
+  // Close arrays and objects
+  while(aopens>acloses){repaired+=']';acloses++;}
+  while(opens>closes){repaired+='}';closes++;}
+  try{JSON.parse(repaired);return repaired;}catch(e){return str;}
+}
+
+// ── AI COACH CALL — full waterfall: Gemini → Groq → Gemini 1.5 → OpenAI → Claude ──
+async function callGeminiRaw(apiKey, prompt){
+  // Track usage against server cap
+  if(window.AISW){
+    var allowed = await AISW.trackUsage();
+    if(!allowed){ throw new Error('AI credit limit reached. Contact your admin to increase your cap.'); }
+  }
+
+  if(selectedAfModel==='claude') return callClaudeRaw(getApiKey(),prompt);
+
+  var progress=document.getElementById('af-progress-lbl');
+  var lastError='';
+
+  // 1. Try Gemini models first
+  var geminiKey=apiKey||getGeminiKey();
+  if(geminiKey){
+    var geminiModels=selectedAfModel==='gemini-2.0-flash-lite'
+      ?['gemini-2.0-flash-lite','gemini-2.0-flash','gemini-1.5-flash']
+      :['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
+    for(var gi=0;gi<geminiModels.length;gi++){
+      var model=geminiModels[gi];
+      try{
+        if(progress&&gi>0) progress.textContent='Gemini busy, trying '+model+'...';
+        var resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+geminiKey,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8192,temperature:0.2}})
+        });
+        var data=await resp.json();
+        if(data.error){
+          lastError=data.error.message;
+          var isOverload=data.error.code===429||data.error.code===503||lastError.indexOf('overload')>=0||lastError.indexOf('high demand')>=0||lastError.indexOf('quota')>=0;
+          if(isOverload){continue;}
+          throw new Error(lastError);
+        }
+        var text=(data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||'';
+        text=text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+        // Attempt to repair truncated JSON
+        if(text&&(text[0]==='{'||text[0]==='[')){text=repairJSON(text);}
+        return text;
+      }catch(err){lastError=err.message;}
+    }
+  }
+
+  // 2. Try Groq (free, fast, Llama 3)
+  var groqKey=getGroqKey();
+  if(groqKey){
+    try{
+      if(progress) progress.textContent='Trying Groq (Llama 3, free)...';
+      var gresp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+groqKey},
+        body:JSON.stringify({model:'llama3-70b-8192',messages:[{role:'user',content:prompt}],max_tokens:8000,temperature:0.2})
+      });
+      var gdata=await gresp.json();
+      if(gdata.error) throw new Error(gdata.error.message);
+      var gtext=(gdata.choices&&gdata.choices[0]&&gdata.choices[0].message&&gdata.choices[0].message.content)||'';
+      return gtext.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    }catch(err){lastError=err.message;}
+  }
+
+  // 3. Try OpenAI (paid fallback)
+  var oaiKey=getOpenAIKey();
+  if(oaiKey){
+    try{
+      if(progress) progress.textContent='Trying OpenAI GPT-4o-mini...';
+      var oresp=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+oaiKey},
+        body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'user',content:prompt}],max_tokens:8000,temperature:0.2})
+      });
+      var odata=await oresp.json();
+      if(odata.error) throw new Error(odata.error.message);
+      var otext=(odata.choices&&odata.choices[0]&&odata.choices[0].message&&odata.choices[0].message.content)||'';
+      return otext.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    }catch(err){lastError=err.message;}
+  }
+
+  // 4. Try Claude (paid, best quality)
+  var claudeKey=getApiKey();
+  if(claudeKey){
+    try{
+      if(progress) progress.textContent='Trying Claude Sonnet...';
+      return await callClaudeRaw(claudeKey,prompt);
+    }catch(err){lastError=err.message;}
+  }
+
+  throw new Error('All AI providers failed or no keys configured. Last error: '+lastError+'\n\nAdd at least one key in Rep Profile → API Keys.');
+}
+
+var selectedAfModel='gemini-2.5-flash';
+
+function selectModel(model){
+  selectedAfModel = model;
+  ['gemini-2.5-flash','gemini-2.0-flash-lite','claude'].forEach(function(m){
+    var el = document.getElementById('model-opt-'+m.replace(/\./g,'-'));
+    if(el) el.style.borderColor = (m===model) ? (model==='claude'?'var(--blue)':'var(--green)') : 'var(--border)';
+  });
+}
+
+// ── GEMINI RAW CALL with fallback chain ──
+var GEMINI_MODELS = ['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
+
+async function callGeminiRaw(apiKey, prompt){
+  // If rep chose Claude, route there instead
+  if(selectedAfModel === 'claude'){
+    return callClaudeRaw(getApiKey(), prompt);
+  }
+
+  // Try selected model first, then fallback chain
+  var modelsToTry = [selectedAfModel];
+  GEMINI_MODELS.forEach(function(m){
+    if(modelsToTry.indexOf(m)===-1) modelsToTry.push(m);
+  });
+
+  var lastError = '';
+  for(var i=0; i<modelsToTry.length; i++){
+    var model = modelsToTry[i];
+    try {
+      var progress = document.getElementById('af-progress-lbl');
+      if(progress && i>0) progress.textContent = 'Model busy, trying '+model+'...';
+
+      var resp = await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+apiKey,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{role:'user',parts:[{text:prompt}]}],
+          generationConfig:{maxOutputTokens:4000,temperature:0.3}
+        })
+      });
+      var data = await resp.json();
+      if(data.error){
+        lastError = data.error.message;
+        // If overloaded or rate limited, try next model
+        if(data.error.code===429||data.error.code===503||data.error.message.indexOf('overload')>=0||data.error.message.indexOf('high demand')>=0){
+          continue;
+        }
+        throw new Error(data.error.message);
+      }
+      var text = (data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||'';
+      text = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+      if(!text) throw new Error('Empty response from '+model);
+      return text;
+    } catch(err){
+      lastError = err.message;
+      // If it's a network error or non-overload error on first model, don't retry
+      if(i===0 && err.message.indexOf('overload')<0 && err.message.indexOf('high demand')<0 && err.message.indexOf('429')<0 && err.message.indexOf('503')<0){
+        throw err;
+      }
+      if(i===modelsToTry.length-1) throw new Error('All Gemini models busy. Try selecting Claude if you have an Anthropic key, or try again in a few minutes. Last error: '+lastError);
+    }
+  }
+  throw new Error('All models failed: '+lastError);
+}
+
+// ── CLAUDE RAW CALL (for auto-fill when Gemini is overloaded) ──
+async function callClaudeRaw(apiKey, prompt){
+  if(!apiKey) throw new Error('No Anthropic API key. Add it in the API Keys section first.');
+  var resp = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:8000,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  var data = await resp.json();
+  if(data.error) throw new Error(data.error.message);
+  var text = (data.content&&data.content[0]&&data.content[0].text)||'';
+  text = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+  return text;
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  // Check auth first — AISW is defined by auth.js loaded after this script
+  // Use a short defer to ensure auth.js has loaded
+  setTimeout(function(){
+    if(!window.AISW){ window.location.href='/'; return; }
+    AISW.requireAuth(function(user){
+      // Load playbook from server, fall back to localStorage
+      AISW.loadPlaybook(function(pb){
+        if(pb && pb.rep){
+          S.rep = pb.rep;
+          S.products = pb.products || [];
+        } else {
+          loadState(); // fall back to localStorage
+        }
+        // Load API keys from server
+        AISW.loadKeys(function(keys){
+          if(keys.gemini){  var el=document.getElementById('gemini-apikey');  if(el){ el.value=keys.gemini;  checkGeminiKey(); } }
+          if(keys.anthropic){var el=document.getElementById('rep-apikey');    if(el){ el.value=keys.anthropic;checkApiKey(); } }
+          if(keys.groq){    var el=document.getElementById('groq-apikey');    if(el){ el.value=keys.groq;    checkGroqKey(); } }
+          if(keys.serper){  var el=document.getElementById('serper-apikey');  if(el){ el.value=keys.serper;  checkSerperKey(); } }
+          if(keys.openai){  var el=document.getElementById('openai-apikey'); if(el){ el.value=keys.openai;  checkOpenAIKey(); } }
+          // Also try localStorage for any keys not on server
+          loadApiKey();
+        });
+        restoreRepForm();
+        ['rep-ind','pm-lang','pd-ind','pd-trig','pd-roi'].forEach(initTag);
+        renderSidebar();renderOverview();updateBadge();updateComp();setChatCtx('rep');
+        if(S.rep.linkedin)sv('rep-linkedin',S.rep.linkedin);
+        // Show user info in header
+        var unEl=document.getElementById('aisw-user-name');
+        if(unEl) unEl.textContent = user.name || user.email;
+        var ubEl=document.getElementById('aisw-usage-badge');
+        if(ubEl && user.usage){ ubEl.textContent = user.usage.current+'/'+user.usage.cap+' AI calls'; }
+      });
+    });
+  }, 50);
+});
+</script>
+<script src="/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-SalesWizard — Sign In</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#4EA72E;--green-d:#3d8a24;--green-bg:#f0f9ec;--green-b:rgba(78,167,46,0.2);
+  --blue:#156082;--blue-d:#0f4a63;--blue-bg:#eef4f8;--blue-b:rgba(21,96,130,0.2);
+  --brown:#795F16;--brown-bg:#fdf7ec;--brown-b:rgba(121,95,22,0.2);
+  --red:#c0392b;--red-bg:#fdf0ee;--red-b:rgba(192,57,43,0.2);
+  --bg:#f4f5f7;--white:#fff;--border:#e0e3e8;--text:#1a1d23;--text2:#4a5568;--text3:#8a95a3;
+  font-family:Arial,Helvetica,sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-size:14px}
+.shell{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:10px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.card-top{padding:28px 30px 22px;border-bottom:1px solid var(--border)}
+.wordmark{font-size:18px;font-weight:700;color:var(--blue);display:flex;align-items:center;gap:9px;letter-spacing:-.01em;margin-bottom:6px}
+.wm-icon{width:32px;height:32px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;color:white;flex-shrink:0}
+.wm-sub{color:var(--green)}
+.card-sub{font-size:13px;color:var(--text2)}
+.card-body{padding:24px 30px}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg);border-radius:7px;padding:3px}
+.tab{flex:1;text-align:center;padding:7px 0;font-size:13px;font-weight:600;border-radius:5px;cursor:pointer;color:var(--text2);transition:all .12s;border:none;background:none;font-family:Arial,sans-serif}
+.tab.active{background:white;color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text2)}
+input[type=text],input[type=email],input[type=password]{background:white;border:1px solid var(--border);border-radius:6px;padding:9px 12px;font-family:Arial,sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .12s;width:100%}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(21,96,130,.12)}
+input::placeholder{color:var(--text3)}
+.btn{display:block;width:100%;padding:10px 0;border-radius:6px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .12s;border:none;margin-top:4px}
+.btn-primary{background:var(--green);color:white}
+.btn-primary:hover{background:var(--green-d)}
+.msg{font-size:12px;padding:10px 12px;border-radius:6px;margin-bottom:14px;display:none}
+.msg-err{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.msg-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.card-foot{padding:14px 30px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);text-align:center}
+.admin-link{color:var(--blue);text-decoration:none;font-weight:600}
+.admin-link:hover{text-decoration:underline}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="card">
+    <div class="card-top">
+      <div class="wordmark"><div class="wm-icon">⚡</div>AI-Sales<span class="wm-sub">Wizard</span></div>
+      <div class="card-sub">Sales intelligence &amp; playbook platform</div>
+    </div>
+    <div class="card-body">
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('login')">Sign In</button>
+        <button class="tab" onclick="showTab('register')">Register</button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+
+      <!-- Login form -->
+      <div id="tab-login">
+        <div class="fg">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="you@company.com" autocomplete="email" />
+        </div>
+        <div class="fg">
+          <label>Password</label>
+          <input type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button class="btn btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
+      </div>
+
+      <!-- Register form -->
+      <div id="tab-register" style="display:none">
+        <div class="fg">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="Jane Smith" />
+        </div>
+        <div class="fg">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="you@company.com" autocomplete="email" />
+        </div>
+        <div class="fg">
+          <label>Password</label>
+          <input type="password" id="reg-pw" placeholder="min 6 characters" autocomplete="new-password" />
+        </div>
+        <button class="btn btn-primary" id="reg-btn" onclick="doRegister()">Create Account</button>
+      </div>
+    </div>
+    <div class="card-foot">
+      Admin? <a href="/admin" class="admin-link">Admin Panel</a>
+    </div>
+  </div>
+</div>
+<script>
+// Redirect if already logged in
+(function(){
+  var t = localStorage.getItem('aisw_token');
+  if(t){ window.location.href = '/app'; }
+})();
+
+var activeTab = 'login';
+
+function showTab(t){
+  activeTab = t;
+  document.getElementById('tab-login').style.display    = t==='login'    ? '' : 'none';
+  document.getElementById('tab-register').style.display = t==='register' ? '' : 'none';
+  document.querySelectorAll('.tab').forEach(function(el,i){ el.classList.toggle('active', (i===0&&t==='login')||(i===1&&t==='register')); });
+  clearMsg();
+}
+
+function showMsg(text, ok){
+  var el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + (ok ? 'msg-ok' : 'msg-err');
+  el.style.display = 'block';
+}
+
+function clearMsg(){
+  var el = document.getElementById('msg'); el.style.display='none';
+}
+
+function setLoading(btnId, loading){
+  var btn = document.getElementById(btnId);
+  if(loading){ btn.innerHTML='<span class="spinner"></span>Please wait...'; btn.disabled=true; }
+  else{ btn.innerHTML=activeTab==='login'?'Sign In':'Create Account'; btn.disabled=false; }
+}
+
+function doLogin(){
+  var email = document.getElementById('login-email').value.trim();
+  var pw    = document.getElementById('login-pw').value;
+  if(!email||!pw){ showMsg('Enter your email and password.'); return; }
+  setLoading('login-btn', true); clearMsg();
+  fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pw})})
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.error){ showMsg(data.error); setLoading('login-btn',false); return; }
+      localStorage.setItem('aisw_token', data.token);
+      localStorage.setItem('aisw_user', JSON.stringify(data));
+      window.location.href = data.is_admin ? '/admin' : '/app';
+    })
+    .catch(function(){ showMsg('Network error. Try again.'); setLoading('login-btn',false); });
+}
+
+function doRegister(){
+  var name  = document.getElementById('reg-name').value.trim();
+  var email = document.getElementById('reg-email').value.trim();
+  var pw    = document.getElementById('reg-pw').value;
+  if(!name||!email||!pw){ showMsg('Fill in all fields.'); return; }
+  if(pw.length<6){ showMsg('Password must be at least 6 characters.'); return; }
+  setLoading('reg-btn', true); clearMsg();
+  fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,email:email,password:pw})})
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.error){ showMsg(data.error); setLoading('reg-btn',false); return; }
+      showMsg('Account created! Your admin needs to activate it before you can sign in.', true);
+      setLoading('reg-btn',false);
+    })
+    .catch(function(){ showMsg('Network error. Try again.'); setLoading('reg-btn',false); });
+}
+
+// Allow Enter key
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter'){
+    if(activeTab==='login') doLogin();
+    else doRegister();
+  }
+});
+</script>
+</body>
+</html>
